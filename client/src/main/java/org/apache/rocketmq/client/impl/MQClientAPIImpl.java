@@ -162,8 +162,8 @@ public class MQClientAPIImpl {
         System.setProperty(RemotingCommand.REMOTING_VERSION_KEY, Integer.toString(MQVersion.CURRENT_VERSION));
     }
 
-    private final RemotingClient remotingClient;
-    private final TopAddressing topAddressing;
+    private final RemotingClient remotingClient;    // NettyRemotingClient
+    private final TopAddressing topAddressing;      //
     private final ClientRemotingProcessor clientRemotingProcessor;
     private String nameSrvAddr = null;
     private ClientConfig clientConfig;
@@ -221,8 +221,11 @@ public class MQClientAPIImpl {
         this.remotingClient.updateNameServerAddressList(list);
     }
 
+    /**
+     * 启动
+     */
     public void start() {
-        this.remotingClient.start();
+        this.remotingClient.start(); // MQClientAPIImpl # start()
     }
 
     public void shutdown() {

@@ -172,11 +172,11 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     public void start(final boolean startFactory) throws MQClientException {
         switch (this.serviceState) {
             case CREATE_JUST:
-                this.serviceState = ServiceState.START_FAILED;  //服务启动失败
+                this.serviceState = ServiceState.START_FAILED;  //设置服务状态：服务启动失败
 
                 this.checkConfig(); //检查mq生产组名称
 
-                if (!this.defaultMQProducer.getProducerGroup().equals(MixAll.CLIENT_INNER_PRODUCER_GROUP)) {
+                if (!this.defaultMQProducer.getProducerGroup().equals(MixAll.CLIENT_INNER_PRODUCER_GROUP)) {  // CLIENT_INNER_PRODUCER
                     this.defaultMQProducer.changeInstanceNameToPID();
                 }
 
@@ -185,7 +185,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
                 // 保存生产组到MQClientInstance 对象中
                 boolean registerOK = mQClientFactory.registerProducer(this.defaultMQProducer.getProducerGroup(), this);  //注册生产组实例
-                if (!registerOK) {  // 注册失败， 设置服务状态：刚创建
+                if (!registerOK) {  // 如果注册失败， 设置服务状态：刚创建
                     this.serviceState = ServiceState.CREATE_JUST;
                     throw new MQClientException("The producer group[" + this.defaultMQProducer.getProducerGroup()
                             + "] has been created before, specify another name please." + FAQUrl.suggestTodo(FAQUrl.GROUP_NAME_DUPLICATE_URL),
@@ -199,9 +199,8 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                     mQClientFactory.start(); // 客户实例启动
                 }
 
-                log.info("the producer [{}] start OK. sendMessageWithVIPChannel={}", this.defaultMQProducer.getProducerGroup(),
-                        this.defaultMQProducer.isSendMessageWithVIPChannel());
-                this.serviceState = ServiceState.RUNNING;
+                log.info("the producer [{}] start OK. sendMessageWithVIPChannel={}", this.defaultMQProducer.getProducerGroup(), this.defaultMQProducer.isSendMessageWithVIPChannel());
+                this.serviceState = ServiceState.RUNNING;  //设置服务状态：服务运行
                 break;
             case RUNNING:
             case START_FAILED:
@@ -214,7 +213,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                 break;
         }
 
-        this.mQClientFactory.sendHeartbeatToAllBrokerWithLock();
+        this.mQClientFactory.sendHeartbeatToAllBrokerWithLock();  //发送心跳to Broker
     }
 
     private void checkConfig() throws MQClientException {

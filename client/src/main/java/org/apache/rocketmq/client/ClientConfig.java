@@ -24,30 +24,37 @@ import org.apache.rocketmq.remoting.protocol.LanguageCode;
 
 /**
  * Client Common configuration
+ * 客户公共的配置
  */
 public class ClientConfig {
+
     public static final String SEND_MESSAGE_WITH_VIP_CHANNEL_PROPERTY = "com.rocketmq.sendMessageWithVIPChannel";
+
     private String namesrvAddr = System.getProperty(MixAll.NAMESRV_ADDR_PROPERTY, System.getenv(MixAll.NAMESRV_ADDR_ENV));
-    private String clientIP = RemotingUtil.getLocalAddress();
+
+    private String clientIP = RemotingUtil.getLocalAddress();  //本机ip
+
     private String instanceName = System.getProperty("rocketmq.client.name", "DEFAULT");
+
     private int clientCallbackExecutorThreads = Runtime.getRuntime().availableProcessors();
     /**
-     * Pulling topic information interval from the named server
+     * 从命名服务器中提取主题信息间隔
      */
     private int pollNameServerInterval = 1000 * 30;
     /**
-     * Heartbeat interval in microseconds with message broker
+     * 消息代理的心跳间隔(以微秒为单位)
      */
     private int heartbeatBrokerInterval = 1000 * 30;
     /**
-     * Offset persistent interval for consumer
+     * 偏移使用者的持久时间间隔
      */
     private int persistConsumerOffsetInterval = 1000 * 5;
     private boolean unitMode = false;
     private String unitName;
+    //vip通道
     private boolean vipChannelEnabled = Boolean.parseBoolean(System.getProperty(SEND_MESSAGE_WITH_VIP_CHANNEL_PROPERTY, "true"));
 
-    private boolean useTLS = TlsSystemConfig.tlsEnable;
+    private boolean useTLS = TlsSystemConfig.tlsEnable;   //TLS 传输层安全性协议
 
     private LanguageCode language = LanguageCode.JAVA;
 

@@ -85,7 +85,7 @@ import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 public class MQClientInstance {
     private final static long LOCK_TIMEOUT_MILLIS = 3000;
     private final InternalLogger log = ClientLogger.getLog();
-    private final ClientConfig clientConfig;
+    private final ClientConfig clientConfig;    // 客户配置
     private final int instanceIndex;
     private final String clientId;
     private final long bootTimestamp = System.currentTimeMillis();
@@ -93,7 +93,7 @@ public class MQClientInstance {
     private final ConcurrentMap<String/* group */, MQConsumerInner> consumerTable = new ConcurrentHashMap<String, MQConsumerInner>();
     private final ConcurrentMap<String/* group */, MQAdminExtInner> adminExtTable = new ConcurrentHashMap<String, MQAdminExtInner>();
     private final NettyClientConfig nettyClientConfig;
-    private final MQClientAPIImpl mQClientAPIImpl;
+    private final MQClientAPIImpl mQClientAPIImpl;  // mq客户api
     private final MQAdminImpl mQAdminImpl;
     private final ConcurrentMap<String/* Topic */, TopicRouteData> topicRouteTable = new ConcurrentHashMap<String, TopicRouteData>();
     private final Lock lockNamesrv = new ReentrantLock();
@@ -114,7 +114,7 @@ public class MQClientInstance {
     private final DefaultMQProducer defaultMQProducer;
     private final ConsumerStatsManager consumerStatsManager;
     private final AtomicLong sendHeartbeatTimesTotal = new AtomicLong(0);
-    private ServiceState serviceState = ServiceState.CREATE_JUST;
+    private ServiceState serviceState = ServiceState.CREATE_JUST;  //服务状态: 刚创建
     private DatagramSocket datagramSocket;
     private Random random = new Random();
 
@@ -220,28 +220,37 @@ public class MQClientInstance {
         return mqList;
     }
 
+    /**
+     * 启动
+     */
     public void start() throws MQClientException {
 
         synchronized (this) {
             switch (this.serviceState) {
                 case CREATE_JUST:
-                    this.serviceState = ServiceState.START_FAILED;
+                    this.serviceState = ServiceState.START_FAILED; //设置服务状态： 服务启动失败
                     // If not specified,looking address from name server
+                    // 如果没有指定，则从名称服务器查找地址
                     if (null == this.clientConfig.getNamesrvAddr()) {
                         this.mQClientAPIImpl.fetchNameServerAddr();
                     }
                     // Start request-response channel
+                    // 启动通道(请求-响应)
                     this.mQClientAPIImpl.start();
                     // Start various schedule tasks
+                    // 开始多种计划任务
                     this.startScheduledTask();
                     // Start pull service
+                    // 启动拉取服务
                     this.pullMessageService.start();
                     // Start rebalance service
+                    // 启动平衡服务
                     this.rebalanceService.start();
                     // Start push service
+                    // 启动推送服务
                     this.defaultMQProducer.getDefaultMQProducerImpl().start(false);
                     log.info("the client factory [{}] start OK", this.clientId);
-                    this.serviceState = ServiceState.RUNNING;
+                    this.serviceState = ServiceState.RUNNING;  // 服务状态：运行
                     break;
                 case RUNNING:
                     break;
@@ -447,10 +456,13 @@ public class MQClientInstance {
         }
     }
 
+    /**
+     * 发送心跳到所有Broker用锁
+     */
     public void sendHeartbeatToAllBrokerWithLock() {
         if (this.lockHeartbeat.tryLock()) {
             try {
-                this.sendHeartbeatToAllBroker();
+                this.sendHeartbeatToAllBroker(); //发送心跳到所有Broker
                 this.uploadFilterClassSource();
             } catch (final Exception e) {
                 log.error("sendHeartbeatToAllBroker exception", e);
@@ -510,6 +522,9 @@ public class MQClientInstance {
         return false;
     }
 
+    /**
+     * 发送心跳到所有Broker
+     */
     private void sendHeartbeatToAllBroker() {
         final HeartbeatData heartbeatData = this.prepareHeartbeatData();
         final boolean producerEmpty = heartbeatData.getProducerDataSet().isEmpty();
