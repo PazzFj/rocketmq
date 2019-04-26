@@ -85,31 +85,29 @@ import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 public class MQClientInstance {
     private final static long LOCK_TIMEOUT_MILLIS = 3000;
     private final InternalLogger log = ClientLogger.getLog();
-    private final ClientConfig clientConfig;    // 客户配置
+    private final ClientConfig clientConfig;    // 客户配置  DefaultMQProducer
     private final int instanceIndex;
     private final String clientId;
     private final long bootTimestamp = System.currentTimeMillis();
     private final ConcurrentMap<String/* group */, MQProducerInner> producerTable = new ConcurrentHashMap<String, MQProducerInner>();
     private final ConcurrentMap<String/* group */, MQConsumerInner> consumerTable = new ConcurrentHashMap<String, MQConsumerInner>();
     private final ConcurrentMap<String/* group */, MQAdminExtInner> adminExtTable = new ConcurrentHashMap<String, MQAdminExtInner>();
-    private final NettyClientConfig nettyClientConfig;
-    private final MQClientAPIImpl mQClientAPIImpl;  // mq客户api
-    private final MQAdminImpl mQAdminImpl;
+    private final NettyClientConfig nettyClientConfig;      // new NettyClientConfig();   -- Netty配置
+    private final MQClientAPIImpl mQClientAPIImpl;  // mq客户api      通过NettyClientConfig 创建RemotingClient
+    private final MQAdminImpl mQAdminImpl;      // new MQAdminImpl(this);
     private final ConcurrentMap<String/* Topic */, TopicRouteData> topicRouteTable = new ConcurrentHashMap<String, TopicRouteData>();
     private final Lock lockNamesrv = new ReentrantLock();
     private final Lock lockHeartbeat = new ReentrantLock();
-    private final ConcurrentMap<String/* Broker Name */, HashMap<Long/* brokerId */, String/* address */>> brokerAddrTable =
-        new ConcurrentHashMap<String, HashMap<Long, String>>();
-    private final ConcurrentMap<String/* Broker Name */, HashMap<String/* address */, Integer>> brokerVersionTable =
-        new ConcurrentHashMap<String, HashMap<String, Integer>>();
+    private final ConcurrentMap<String/* Broker Name */, HashMap<Long/* brokerId */, String/* address */>> brokerAddrTable = new ConcurrentHashMap<String, HashMap<Long, String>>();
+    private final ConcurrentMap<String/* Broker Name */, HashMap<String/* address */, Integer>> brokerVersionTable = new ConcurrentHashMap<String, HashMap<String, Integer>>();
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
         @Override
         public Thread newThread(Runnable r) {
             return new Thread(r, "MQClientFactoryScheduledThread");
         }
     });
-    private final ClientRemotingProcessor clientRemotingProcessor;
-    private final PullMessageService pullMessageService;
+    private final ClientRemotingProcessor clientRemotingProcessor;   // new ClientRemotingProcessor(this);
+    private final PullMessageService pullMessageService;             // new PullMessageService(this);
     private final RebalanceService rebalanceService;
     private final DefaultMQProducer defaultMQProducer;
     private final ConsumerStatsManager consumerStatsManager;
@@ -236,7 +234,8 @@ public class MQClientInstance {
                     }
                     // Start request-response channel
                     // 启动通道(请求-响应)
-                    this.mQClientAPIImpl.start();
+                    /**@see org.apache.rocketmq.remoting.netty.NettyRemotingClient#start()*/
+                    this.mQClientAPIImpl.start();       // NettyRemotingClient.start()   创建管道Channel
                     // Start various schedule tasks
                     // 开始多种计划任务
                     this.startScheduledTask();
@@ -264,6 +263,14 @@ public class MQClientInstance {
         }
     }
 
+    /**
+     * 开启安排任务
+     * 1、获取服务地址名称
+     * 2、修改Topic 路线信息到服务地址
+     * 3、清除Broker 脱机(Offline) 发送心跳到Broker
+     * 4、存留(persist) 所有消费记录(Offset)
+     * 5、调整(adjust) 线程池
+     */
     private void startScheduledTask() {
         if (null == this.clientConfig.getNamesrvAddr()) {
             this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
@@ -271,7 +278,7 @@ public class MQClientInstance {
                 @Override
                 public void run() {
                     try {
-                        MQClientInstance.this.mQClientAPIImpl.fetchNameServerAddr();
+                        MQClientInstance.this.mQClientAPIImpl.fetchNameServerAddr(); // 取到服务地址名称
                     } catch (Exception e) {
                         log.error("ScheduledTask fetchNameServerAddr exception", e);
                     }

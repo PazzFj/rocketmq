@@ -225,7 +225,7 @@ public class MQClientAPIImpl {
      * 启动
      */
     public void start() {
-        this.remotingClient.start(); // MQClientAPIImpl # start()
+        this.remotingClient.start(); // NettyRemotingClient # start()
     }
 
     public void shutdown() {

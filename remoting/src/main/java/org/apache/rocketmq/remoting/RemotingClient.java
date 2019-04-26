@@ -25,30 +25,38 @@ import org.apache.rocketmq.remoting.exception.RemotingTooMuchRequestException;
 import org.apache.rocketmq.remoting.netty.NettyRequestProcessor;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
+/**
+ * 远程客户
+ */
 public interface RemotingClient extends RemotingService {
 
+    // 修改服务地址名称
     void updateNameServerAddressList(final List<String> addrs);
 
+    // 获服务地址名称
     List<String> getNameServerAddressList();
 
-    RemotingCommand invokeSync(final String addr, final RemotingCommand request,
-        final long timeoutMillis) throws InterruptedException, RemotingConnectException,
-        RemotingSendRequestException, RemotingTimeoutException;
+    // 执行 同步
+    RemotingCommand invokeSync(final String addr, final RemotingCommand request, final long timeoutMillis)
+            throws InterruptedException, RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException;
 
-    void invokeAsync(final String addr, final RemotingCommand request, final long timeoutMillis,
-        final InvokeCallback invokeCallback) throws InterruptedException, RemotingConnectException,
-        RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException;
+    // 执行 异步
+    void invokeAsync(final String addr, final RemotingCommand request, final long timeoutMillis, final InvokeCallback invokeCallback)
+            throws InterruptedException, RemotingConnectException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException;
 
+    // 执行 单向
     void invokeOneway(final String addr, final RemotingCommand request, final long timeoutMillis)
-        throws InterruptedException, RemotingConnectException, RemotingTooMuchRequestException,
-        RemotingTimeoutException, RemotingSendRequestException;
+        throws InterruptedException, RemotingConnectException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException;
 
-    void registerProcessor(final int requestCode, final NettyRequestProcessor processor,
-        final ExecutorService executor);
+    // 注册处理
+    void registerProcessor(final int requestCode, final NettyRequestProcessor processor, final ExecutorService executor);
 
+    // 设置回调执行器
     void setCallbackExecutor(final ExecutorService callbackExecutor);
 
+    // 获取回调执行器
     ExecutorService getCallbackExecutor();
 
+    // 是否写入管道
     boolean isChannelWritable(final String addr);
 }
