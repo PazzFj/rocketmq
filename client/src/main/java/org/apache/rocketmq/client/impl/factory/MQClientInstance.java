@@ -108,7 +108,7 @@ public class MQClientInstance {
     });
     private final ClientRemotingProcessor clientRemotingProcessor;   // new ClientRemotingProcessor(this);
     private final PullMessageService pullMessageService;             // new PullMessageService(this);
-    private final RebalanceService rebalanceService;
+    private final RebalanceService rebalanceService;                 // new RebalanceService(this);
     private final DefaultMQProducer defaultMQProducer;
     private final ConsumerStatsManager consumerStatsManager;
     private final AtomicLong sendHeartbeatTimesTotal = new AtomicLong(0);
@@ -240,14 +240,14 @@ public class MQClientInstance {
                     // 开始多种计划任务
                     this.startScheduledTask();
                     // Start pull service
-                    // 启动拉取服务
+                    // 启动拉取服务(创建、启动线程)
                     this.pullMessageService.start();
                     // Start rebalance service
                     // 启动平衡服务
                     this.rebalanceService.start();
                     // Start push service
                     // 启动推送服务
-                    this.defaultMQProducer.getDefaultMQProducerImpl().start(false);
+                    this.defaultMQProducer.getDefaultMQProducerImpl().start(false);  //启动mq producer 服务
                     log.info("the client factory [{}] start OK", this.clientId);
                     this.serviceState = ServiceState.RUNNING;  // 服务状态：运行
                     break;
