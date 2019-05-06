@@ -104,6 +104,10 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
         }
     }
 
+    /**
+     * 实例化生产组对象
+     * @param producerGroup 生产组名称
+     */
     public DefaultMQProducer(final String producerGroup) {
         this(producerGroup, null);
     }
