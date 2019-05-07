@@ -17,7 +17,7 @@
 package org.apache.rocketmq.common.consumer;
 
 public enum ConsumeFromWhere {
-    CONSUME_FROM_LAST_OFFSET,
+    CONSUME_FROM_LAST_OFFSET,//尾部消费
 
     @Deprecated
     CONSUME_FROM_LAST_OFFSET_AND_FROM_MIN_WHEN_BOOT_FIRST,
