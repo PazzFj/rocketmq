@@ -27,86 +27,57 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
  */
 public interface MQAdmin {
     /**
-     * Creates an topic
-     *
-     * @param key accesskey
-     * @param newTopic topic name
-     * @param queueNum topic's queue number
+     * 创建Topic (key、newTopic、queueNum) queueNum主题的队列号码
      */
     void createTopic(final String key, final String newTopic, final int queueNum)
         throws MQClientException;
 
     /**
-     * Creates an topic
+     * 创建Topic
      *
      * @param key accesskey
      * @param newTopic topic name
-     * @param queueNum topic's queue number
-     * @param topicSysFlag topic system flag
+     * @param queueNum 主题的队列号码
+     * @param topicSysFlag 主题系统标志
      */
     void createTopic(String key, String newTopic, int queueNum, int topicSysFlag)
         throws MQClientException;
 
     /**
-     * Gets the message queue offset according to some time in milliseconds<br>
-     * be cautious to call because of more IO overhead
-     *
-     * @param mq Instance of MessageQueue
-     * @param timestamp from when in milliseconds.
-     * @return offset
+     * 获取消息队列偏移量，偏移量以毫秒为单位<br>。由于IO开销较大，请谨慎调用
      */
     long searchOffset(final MessageQueue mq, final long timestamp) throws MQClientException;
 
     /**
-     * Gets the max offset
-     *
-     * @param mq Instance of MessageQueue
-     * @return the max offset
+     * 获取最大偏移量
      */
     long maxOffset(final MessageQueue mq) throws MQClientException;
 
     /**
-     * Gets the minimum offset
-     *
-     * @param mq Instance of MessageQueue
-     * @return the minimum offset
+     * 获取最小偏移量
      */
     long minOffset(final MessageQueue mq) throws MQClientException;
 
     /**
-     * Gets the earliest stored message time
-     *
-     * @param mq Instance of MessageQueue
-     * @return the time in microseconds
+     * 获取最早存储的消息时间
      */
     long earliestMsgStoreTime(final MessageQueue mq) throws MQClientException;
 
     /**
-     * Query message according tto message id
-     *
-     * @param offsetMsgId message id
-     * @return message
+     * 根据消息id查询消息
      */
     MessageExt viewMessage(final String offsetMsgId) throws RemotingException, MQBrokerException,
         InterruptedException, MQClientException;
 
     /**
-     * Query messages
-     *
-     * @param topic message topic
-     * @param key message key index word
-     * @param maxNum max message number
-     * @param begin from when
-     * @param end to when
-     * @return Instance of QueryResult
+     * 查询消息
      */
-    QueryResult queryMessage(final String topic, final String key, final int maxNum, final long begin,
-        final long end) throws MQClientException, InterruptedException;
+    QueryResult queryMessage(final String topic, final String key, final int maxNum, final long begin, final long end)
+            throws MQClientException, InterruptedException;
 
     /**
-     * @return The {@code MessageExt} of given msgId
+     * 根据消息id、主题 查询消息
      */
-    MessageExt viewMessage(String topic,
-        String msgId) throws RemotingException, MQBrokerException, InterruptedException, MQClientException;
+    MessageExt viewMessage(String topic, String msgId) throws RemotingException, MQBrokerException, InterruptedException, MQClientException;
 
 }

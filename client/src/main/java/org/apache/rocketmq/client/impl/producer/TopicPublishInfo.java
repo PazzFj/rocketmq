@@ -23,12 +23,16 @@ import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.common.protocol.route.QueueData;
 import org.apache.rocketmq.common.protocol.route.TopicRouteData;
 
+/**
+ * 主题发布信息
+ */
 public class TopicPublishInfo {
-    private boolean orderTopic = false;
-    private boolean haveTopicRouterInfo = false;
-    private List<MessageQueue> messageQueueList = new ArrayList<MessageQueue>();
-    private volatile ThreadLocalIndex sendWhichQueue = new ThreadLocalIndex();
-    private TopicRouteData topicRouteData;
+
+    private boolean orderTopic = false;             // Topic 顺序
+    private boolean haveTopicRouterInfo = false;    // Topic 路由信息
+    private List<MessageQueue> messageQueueList = new ArrayList<MessageQueue>();    // 消息队列数组
+    private volatile ThreadLocalIndex sendWhichQueue = new ThreadLocalIndex();      // 发送的队列 下标 +1
+    private TopicRouteData topicRouteData;          // topic 路线数据
 
     public boolean isOrderTopic() {
         return orderTopic;
@@ -70,7 +74,7 @@ public class TopicPublishInfo {
         if (lastBrokerName == null) {
             return selectOneMessageQueue();
         } else {
-            int index = this.sendWhichQueue.getAndIncrement();
+            int index = this.sendWhichQueue.getAndIncrement(); // 随机数 +1
             for (int i = 0; i < this.messageQueueList.size(); i++) {
                 int pos = Math.abs(index++) % this.messageQueueList.size();
                 if (pos < 0)

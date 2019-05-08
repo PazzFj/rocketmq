@@ -88,15 +88,23 @@ import org.apache.rocketmq.remoting.exception.RemotingTimeoutException;
 import org.apache.rocketmq.remoting.exception.RemotingTooMuchRequestException;
 
 public class DefaultMQProducerImpl implements MQProducerInner {
+
     private final InternalLogger log = ClientLogger.getLog();
-    private final Random random = new Random();
-    private final DefaultMQProducer defaultMQProducer;  //mq提供者
-    //TopicPublishInfo
-    private final ConcurrentMap<String/* topic */, TopicPublishInfo> topicPublishInfoTable = new ConcurrentHashMap<String, TopicPublishInfo>();
-    private final ArrayList<SendMessageHook> sendMessageHookList = new ArrayList<SendMessageHook>();
+
+    private final Random random = new Random();             // 随机器
+
+    private final DefaultMQProducer defaultMQProducer;      // MQProducer
+
+    private final ConcurrentMap<String, TopicPublishInfo> topicPublishInfoTable = new ConcurrentHashMap<String, TopicPublishInfo>();
+
+    private final ArrayList<SendMessageHook> sendMessageHookList = new ArrayList<SendMessageHook>();  // 发送消息钩子(接口)
+
     private final RPCHook rpcHook;   //RPC钩子  默认null
-    protected BlockingQueue<Runnable> checkRequestQueue;
+
+    protected BlockingQueue<Runnable> checkRequestQueue;    // 阻塞队列 (线程) #TODO
+
     protected ExecutorService checkExecutor;
+
     private ServiceState serviceState = ServiceState.CREATE_JUST;   // 服务默认状态：刚创建
     private MQClientInstance mQClientFactory;
     private ArrayList<CheckForbiddenHook> checkForbiddenHookList = new ArrayList<CheckForbiddenHook>();
