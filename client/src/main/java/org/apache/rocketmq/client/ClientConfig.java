@@ -30,33 +30,30 @@ public class ClientConfig {
 
     public static final String SEND_MESSAGE_WITH_VIP_CHANNEL_PROPERTY = "com.rocketmq.sendMessageWithVIPChannel";
 
-    private String namesrvAddr = System.getProperty(MixAll.NAMESRV_ADDR_PROPERTY, System.getenv(MixAll.NAMESRV_ADDR_ENV));
+    private String namesrvAddr = System.getProperty(MixAll.NAMESRV_ADDR_PROPERTY, System.getenv(MixAll.NAMESRV_ADDR_ENV)); //主机地址  localhost:9876   默认值: NAMESRV_ADDR
 
-    private String clientIP = RemotingUtil.getLocalAddress();  //本机ip
+    private String clientIP = RemotingUtil.getLocalAddress();  //客户端ip
 
-    private String instanceName = System.getProperty("rocketmq.client.name", "DEFAULT");
+    private String instanceName = System.getProperty("rocketmq.client.name", "DEFAULT"); // 客户端名称
 
-    private int clientCallbackExecutorThreads = Runtime.getRuntime().availableProcessors();
-    /**
-     * 从命名服务器中提取主题信息间隔
-     */
-    private int pollNameServerInterval = 1000 * 30;
-    /**
-     * 消息代理的心跳间隔(以微秒为单位)
-     */
-    private int heartbeatBrokerInterval = 1000 * 30;
-    /**
-     * 偏移使用者的持久时间间隔
-     */
-    private int persistConsumerOffsetInterval = 1000 * 5;
-    private boolean unitMode = false;
-    private String unitName;
-    //vip通道
+    private int clientCallbackExecutorThreads = Runtime.getRuntime().availableProcessors();  // 客户端回调线程池数
+
+    private int pollNameServerInterval = 1000 * 30;     // 从命名服务器中提取主题信息间隔 30s
+
+    private int heartbeatBrokerInterval = 1000 * 30;    // 消息代理的心跳间隔 30s
+
+    private int persistConsumerOffsetInterval = 1000 * 5;   // 存留消费者抵消间隔 5s
+
+    private boolean unitMode = false;   // 单元模式
+
+    private String unitName;            // 单元名称
+
+    // 是否开启vip通道 (默认true)
     private boolean vipChannelEnabled = Boolean.parseBoolean(System.getProperty(SEND_MESSAGE_WITH_VIP_CHANNEL_PROPERTY, "true"));
 
-    private boolean useTLS = TlsSystemConfig.tlsEnable;   //TLS 传输层安全性协议
+    private boolean useTLS = TlsSystemConfig.tlsEnable;   // TLS 传输层安全性协议 (false)
 
-    private LanguageCode language = LanguageCode.JAVA;
+    private LanguageCode language = LanguageCode.JAVA;  // 语言枚举 (Java)
 
     public String buildMQClientId() {
         StringBuilder sb = new StringBuilder();

@@ -51,14 +51,17 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
     private final InternalLogger log = ClientLogger.getLog();
     //
     protected final transient DefaultMQProducerImpl defaultMQProducerImpl;   // new DefaultMQProducerImpl(this, rpcHook);
+
     // 生产者组在概念上聚合完全相同角色的所有生产者实例，这在涉及事务消息时尤为重要
     private String producerGroup;
+
     // 仅用于测试或演示程序
     private String createTopicKey = MixAll.AUTO_CREATE_TOPIC_KEY_TOPIC;  // TBW102
+
     // 默认主题队列数量
     private volatile int defaultTopicQueueNums = 4;
-    // 发送消息超时 (3秒)
-    private int sendMsgTimeout = 3000;
+
+    private int sendMsgTimeout = 3000;// 发送消息超时 (3秒)
     private int compressMsgBodyOverHowmuch = 1024 * 4;
     private int retryTimesWhenSendFailed = 2;
     private int retryTimesWhenSendAsyncFailed = 2;
