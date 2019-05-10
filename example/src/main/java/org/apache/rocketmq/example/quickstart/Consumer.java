@@ -54,7 +54,7 @@ public class Consumer {
          */
         consumer.setNamesrvAddr("47.101.167.134:9876");
 
-        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
+        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_LAST_OFFSET);
 
         /*
          * Subscribe one more more topics to consume.
@@ -74,7 +74,9 @@ public class Consumer {
 //            }
 //        });
         consumer.registerMessageListener((MessageListenerConcurrently) (msgs, text) -> {
-            System.out.printf("%s Receive New Messages: %s %n", Thread.currentThread().getName(), msgs);
+            msgs.forEach(message -> {
+                System.out.println(new String(message.getBody()));
+            });
             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
         });
 
