@@ -17,9 +17,19 @@
 package org.apache.rocketmq.client.hook;
 
 public interface SendMessageHook {
+
+    /**
+     * 钩子名
+     */
     String hookName();
 
+    /**
+     * 发送消息上下文之前
+     */
     void sendMessageBefore(final SendMessageContext context);
 
+    /**
+     * 发送消息上下文之后
+     */
     void sendMessageAfter(final SendMessageContext context);
 }
