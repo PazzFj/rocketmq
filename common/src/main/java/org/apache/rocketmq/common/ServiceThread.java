@@ -23,7 +23,7 @@ import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 
 /**
- * 服务线程（线程）
+ * 服务线程 (线程)
  */
 public abstract class ServiceThread implements Runnable {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.COMMON_LOGGER_NAME);
@@ -34,7 +34,7 @@ public abstract class ServiceThread implements Runnable {
     protected final CountDownLatch2 waitPoint = new CountDownLatch2(1);
     protected volatile AtomicBoolean hasNotified = new AtomicBoolean(false);
     protected volatile boolean stopped = false;
-    protected boolean isDaemon = false;
+    protected boolean isDaemon = false; // 这个线程是否是守护进程线程
 
     //Make it able to restart the thread
     private final AtomicBoolean started = new AtomicBoolean(false);
@@ -74,16 +74,16 @@ public abstract class ServiceThread implements Runnable {
 
         try {
             if (interrupt) {
+                // 中断线程
                 this.thread.interrupt();
             }
 
             long beginTime = System.currentTimeMillis();
-            if (!this.thread.isDaemon()) {
+            if (!this.thread.isDaemon()) {  // 测试这个线程是否是守护进程线程。
                 this.thread.join(this.getJointime());
             }
             long eclipseTime = System.currentTimeMillis() - beginTime;
-            log.info("join thread " + this.getServiceName() + " eclipse time(ms) " + eclipseTime + " "
-                + this.getJointime());
+            log.info("join thread " + this.getServiceName() + " eclipse time(ms) " + eclipseTime + " " + this.getJointime());
         } catch (InterruptedException e) {
             log.error("Interrupted", e);
         }

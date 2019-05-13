@@ -91,8 +91,8 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     private final InternalLogger log = ClientLogger.getLog();
     private final Random random = new Random();
     private final DefaultMQProducer defaultMQProducer;  //mq提供者
-    //TopicPublishInfo
-    private final ConcurrentMap<String/* topic */, TopicPublishInfo> topicPublishInfoTable = new ConcurrentHashMap<String, TopicPublishInfo>();
+    // TBW102 ==> TopicPublishInfo
+    private final ConcurrentMap<String, TopicPublishInfo> topicPublishInfoTable = new ConcurrentHashMap<String, TopicPublishInfo>();
     private final ArrayList<SendMessageHook> sendMessageHookList = new ArrayList<SendMessageHook>();
     private final RPCHook rpcHook;   //RPC钩子  默认null
     protected BlockingQueue<Runnable> checkRequestQueue;
@@ -102,7 +102,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     private ArrayList<CheckForbiddenHook> checkForbiddenHookList = new ArrayList<CheckForbiddenHook>();
     private int zipCompressLevel = Integer.parseInt(System.getProperty(MixAll.MESSAGE_COMPRESS_LEVEL, "5"));
 
-    private MQFaultStrategy mqFaultStrategy = new MQFaultStrategy();
+    private MQFaultStrategy mqFaultStrategy = new MQFaultStrategy(); // mq故障策略
 
     private final BlockingQueue<Runnable> asyncSenderThreadPoolQueue;  //队列
     private final ExecutorService defaultAsyncSenderExecutor;   //线程池
@@ -170,12 +170,10 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     }
 
     /**
-     *
-     * @param startFactory
-     * @throws MQClientException
+     * DefaultMQProducerImpl启动
      */
     public void start(final boolean startFactory) throws MQClientException {
-        switch (this.serviceState) {
+        switch (this.serviceState) {    // 服务状态（默认刚创建）
             case CREATE_JUST:
                 this.serviceState = ServiceState.START_FAILED;  //设置服务状态：服务启动失败
 
@@ -190,14 +188,14 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
                 // 保存生产组到MQClientInstance 对象中
                 boolean registerOK = mQClientFactory.registerProducer(this.defaultMQProducer.getProducerGroup(), this);  //注册生产组实例
-                if (!registerOK) {  // 如果注册失败， 设置服务状态：刚创建
+                if (!registerOK) {  // 若生成组名称已存在, 抛异常
                     this.serviceState = ServiceState.CREATE_JUST;
                     throw new MQClientException("The producer group[" + this.defaultMQProducer.getProducerGroup()
                             + "] has been created before, specify another name please." + FAQUrl.suggestTodo(FAQUrl.GROUP_NAME_DUPLICATE_URL),
                             null);
                 }
 
-                // 储存==> (TopicKey -> TopicPublishInfo)
+                // 储存 ==> (TopicKey -> TopicPublishInfo)
                 this.topicPublishInfoTable.put(this.defaultMQProducer.getCreateTopicKey(), new TopicPublishInfo());
 
                 if (startFactory) {
@@ -471,8 +469,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     /**
      * DEFAULT ASYNC -------------------------------------------------------
      */
-    public void send(Message msg,
-                     SendCallback sendCallback) throws MQClientException, RemotingException, InterruptedException {
+    public void send(Message msg, SendCallback sendCallback) throws MQClientException, RemotingException, InterruptedException {
         send(msg, sendCallback, this.defaultMQProducer.getSendMsgTimeout());
     }
 

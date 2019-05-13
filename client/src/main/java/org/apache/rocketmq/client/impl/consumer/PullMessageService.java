@@ -27,12 +27,20 @@ import org.apache.rocketmq.common.ServiceThread;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.common.utils.ThreadUtils;
 
+/**
+ * 推动方式消费端使用
+ * 存储拉消息的请求，异步处理请求拉取消息
+ * LinkedBlockingQueue<PullRequest> pullRequestQueue
+ *
+ * pullRequestQueue生产者1，消费端负载均衡更新完成后，发送PullRequest到pullRequestQueue队列中
+ */
 public class PullMessageService extends ServiceThread {
     private final InternalLogger log = ClientLogger.getLog();
+    // 拉取请求队列
     private final LinkedBlockingQueue<PullRequest> pullRequestQueue = new LinkedBlockingQueue<PullRequest>();
     private final MQClientInstance mQClientFactory;
-    private final ScheduledExecutorService scheduledExecutorService = Executors
-        .newSingleThreadScheduledExecutor(new ThreadFactory() {
+    // 单个线程池 (立即执行拉取请求)
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
                 return new Thread(r, "PullMessageServiceScheduledThread");
@@ -43,11 +51,17 @@ public class PullMessageService extends ServiceThread {
         this.mQClientFactory = mQClientFactory;
     }
 
+    /**
+     * 立即执行拉取请求
+     * @param pullRequest 拉取请求
+     * @param timeDelay 延迟时间 ms
+     */
     public void executePullRequestLater(final PullRequest pullRequest, final long timeDelay) {
         if (!isStopped()) {
             this.scheduledExecutorService.schedule(new Runnable() {
                 @Override
                 public void run() {
+                    // 储存拉取请求
                     PullMessageService.this.executePullRequestImmediately(pullRequest);
                 }
             }, timeDelay, TimeUnit.MILLISECONDS);
@@ -56,9 +70,13 @@ public class PullMessageService extends ServiceThread {
         }
     }
 
+    /**
+     * 立即执行拉取请求
+     * @param pullRequest
+     */
     public void executePullRequestImmediately(final PullRequest pullRequest) {
         try {
-            this.pullRequestQueue.put(pullRequest);
+            this.pullRequestQueue.put(pullRequest); // push
         } catch (InterruptedException e) {
             log.error("executePullRequestImmediately pullRequestQueue.put", e);
         }
@@ -92,7 +110,8 @@ public class PullMessageService extends ServiceThread {
 
         while (!this.isStopped()) {
             try {
-                PullRequest pullRequest = this.pullRequestQueue.take();
+                // 检索并删除此队列的头，如有必要则等待，直到某个元素可用为止
+                PullRequest pullRequest = this.pullRequestQueue.take(); // pull
                 this.pullMessage(pullRequest);
             } catch (InterruptedException ignored) {
             } catch (Exception e) {

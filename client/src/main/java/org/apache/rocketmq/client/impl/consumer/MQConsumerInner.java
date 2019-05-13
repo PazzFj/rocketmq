@@ -25,23 +25,44 @@ import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 import org.apache.rocketmq.common.protocol.heartbeat.SubscriptionData;
 
 /**
- * Consumer inner interface
+ * 消费者内部的接口
  */
 public interface MQConsumerInner {
+    /**
+     * 获取组名
+     */
     String groupName();
 
     MessageModel messageModel();
 
+    /**
+     * 消费类型(PULL、 PUSH)
+     */
     ConsumeType consumeType();
 
+    /**
+     * 消费起始位置(头部消费、尾部消费)
+     */
     ConsumeFromWhere consumeFromWhere();
 
+    /**
+     * 订阅
+     */
     Set<SubscriptionData> subscriptions();
 
+    /**
+     * 做调整(平衡)
+     */
     void doRebalance();
 
+    /**
+     * 保存消费记录
+     */
     void persistConsumerOffset();
 
+    /**
+     * 修改topic 订阅信息
+     */
     void updateTopicSubscribeInfo(final String topic, final Set<MessageQueue> info);
 
     boolean isSubscribeTopicNeedUpdate(final String topic);

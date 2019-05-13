@@ -22,20 +22,32 @@ import org.apache.rocketmq.client.producer.TransactionListener;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.common.protocol.header.CheckTransactionStateRequestHeader;
 
+/**
+ * 提供者内部接口
+ */
 public interface MQProducerInner {
+
+    /**
+     * 获取所有发布Topic
+     */
     Set<String> getPublishTopicList();
 
+    /**
+     * 该topic 是否需要修改
+     */
     boolean isPublishTopicNeedUpdate(final String topic);
 
     TransactionCheckListener checkListener();
+
+    // 获取事务监听
     TransactionListener getCheckListener();
 
-    void checkTransactionState(
-        final String addr,
-        final MessageExt msg,
-        final CheckTransactionStateRequestHeader checkRequestHeader);
+    // 检查事务状态
+    void checkTransactionState(final String addr, final MessageExt msg, final CheckTransactionStateRequestHeader checkRequestHeader);
 
+    // 修改topic 发布信息
     void updateTopicPublishInfo(final String topic, final TopicPublishInfo info);
 
+    // 是否单元模式
     boolean isUnitMode();
 }

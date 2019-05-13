@@ -83,33 +83,47 @@ import org.apache.rocketmq.remoting.netty.NettyClientConfig;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
 public class MQClientInstance {
-    private final static long LOCK_TIMEOUT_MILLIS = 3000;
+    private final static long LOCK_TIMEOUT_MILLIS = 3000;  // 锁超时3000毫秒
     private final InternalLogger log = ClientLogger.getLog();
-    private final ClientConfig clientConfig;    // 客户配置  DefaultMQProducer
-    private final int instanceIndex;
-    private final String clientId;
+    private final ClientConfig clientConfig;    // MQProducer 中的配置 copy
+    private final int instanceIndex;        // 默认0 开始
+    private final String clientId;          // 客户端ip @ 客户端名称
     private final long bootTimestamp = System.currentTimeMillis();
+
+    //生产者，消费者，管理者的纪录信息
     private final ConcurrentMap<String/* group */, MQProducerInner> producerTable = new ConcurrentHashMap<String, MQProducerInner>();
     private final ConcurrentMap<String/* group */, MQConsumerInner> consumerTable = new ConcurrentHashMap<String, MQConsumerInner>();
     private final ConcurrentMap<String/* group */, MQAdminExtInner> adminExtTable = new ConcurrentHashMap<String, MQAdminExtInner>();
-    private final NettyClientConfig nettyClientConfig;      // new NettyClientConfig();   -- Netty配置
-    private final MQClientAPIImpl mQClientAPIImpl;  // mq客户api      通过NettyClientConfig 创建RemotingClient
-    private final MQAdminImpl mQAdminImpl;      // new MQAdminImpl(this);
-    private final ConcurrentMap<String/* Topic */, TopicRouteData> topicRouteTable = new ConcurrentHashMap<String, TopicRouteData>();
+    // 通信客户端配置
+    private final NettyClientConfig nettyClientConfig;
+    // 组装请求，代理通信客户端的通信接口
+    private final MQClientAPIImpl mQClientAPIImpl;  // 通过NettyClientConfig 创建RemotingClient
+    // topic, 队列, 消息管理接口
+    private final MQAdminImpl mQAdminImpl;
+    // Topic 路线数据
+    private final ConcurrentMap<String, TopicRouteData> topicRouteTable = new ConcurrentHashMap<String, TopicRouteData>();
     private final Lock lockNamesrv = new ReentrantLock();
     private final Lock lockHeartbeat = new ReentrantLock();
+    //broker主从节点地址表
     private final ConcurrentMap<String/* Broker Name */, HashMap<Long/* brokerId */, String/* address */>> brokerAddrTable = new ConcurrentHashMap<String, HashMap<Long, String>>();
+    //broker版本表
     private final ConcurrentMap<String/* Broker Name */, HashMap<String/* address */, Integer>> brokerVersionTable = new ConcurrentHashMap<String, HashMap<String, Integer>>();
+    // 单个线程池(MQClientFactoryScheduledThread)
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
         @Override
         public Thread newThread(Runnable r) {
             return new Thread(r, "MQClientFactoryScheduledThread");
         }
     });
-    private final ClientRemotingProcessor clientRemotingProcessor;   // new ClientRemotingProcessor(this);
-    private final PullMessageService pullMessageService;             // new PullMessageService(this);
-    private final RebalanceService rebalanceService;                 // new RebalanceService(this);
+    // 请求码处理函数
+    private final ClientRemotingProcessor clientRemotingProcessor;
+    // push方式中, 异步线程处理拉消息请求
+    private final PullMessageService pullMessageService;
+    // 定时任务, 调用消费端负载均衡服务
+    private final RebalanceService rebalanceService;
+    // 内部生产者topic, 用于消费失败或超时的消息, sendMessageBack回发给broker, 放大retry topic中重试消费
     private final DefaultMQProducer defaultMQProducer;
+    // 消费状态管理(消费成功或者消费失败)
     private final ConsumerStatsManager consumerStatsManager;
     private final AtomicLong sendHeartbeatTimesTotal = new AtomicLong(0);
     private ServiceState serviceState = ServiceState.CREATE_JUST;  //服务状态: 刚创建
@@ -123,28 +137,36 @@ public class MQClientInstance {
     public MQClientInstance(ClientConfig clientConfig, int instanceIndex, String clientId, RPCHook rpcHook) {
         this.clientConfig = clientConfig;
         this.instanceIndex = instanceIndex;
+        // 通信客户端配置
         this.nettyClientConfig = new NettyClientConfig();
         this.nettyClientConfig.setClientCallbackExecutorThreads(clientConfig.getClientCallbackExecutorThreads());
         this.nettyClientConfig.setUseTLS(clientConfig.isUseTLS());
+        // 请求码处理函数
         this.clientRemotingProcessor = new ClientRemotingProcessor(this);
         this.mQClientAPIImpl = new MQClientAPIImpl(this.nettyClientConfig, this.clientRemotingProcessor, rpcHook, clientConfig);
 
         if (this.clientConfig.getNamesrvAddr() != null) {
+            // 更新namesrv地址列表
             this.mQClientAPIImpl.updateNameServerAddressList(this.clientConfig.getNamesrvAddr());
             log.info("user specified name server address: {}", this.clientConfig.getNamesrvAddr());
         }
 
         this.clientId = clientId;
 
+        //topic，队列，消息管理接口
         this.mQAdminImpl = new MQAdminImpl(this);
 
+        //push方式中，异步线程处理拉消息请求
         this.pullMessageService = new PullMessageService(this);
 
+        //定时任务，调用消费端负载均衡服务
         this.rebalanceService = new RebalanceService(this);
 
+        //内部生产者topic，用于消费失败或超时的消息，sendMessageBack回发给broker，放大retry topic中重试消费
         this.defaultMQProducer = new DefaultMQProducer(MixAll.CLIENT_INNER_PRODUCER_GROUP);
         this.defaultMQProducer.resetClientConfig(clientConfig);
 
+        // 统计服务
         this.consumerStatsManager = new ConsumerStatsManager(this.scheduledExecutorService);
 
         log.info("Created a new client Instance, InstanceIndex:{}, ClientID:{}, ClientConfig:{}, ClientVersion:{}, SerializerType:{}",
@@ -153,6 +175,7 @@ public class MQClientInstance {
             this.clientConfig,
             MQVersion.getVersionDesc(MQVersion.CURRENT_VERSION), RemotingCommand.getSerializeTypeConfigInThisServer());
     }
+
 
     public static TopicPublishInfo topicRouteData2TopicPublishInfo(final String topic, final TopicRouteData route) {
         TopicPublishInfo info = new TopicPublishInfo();
@@ -232,24 +255,20 @@ public class MQClientInstance {
                     if (null == this.clientConfig.getNamesrvAddr()) {
                         this.mQClientAPIImpl.fetchNameServerAddr();
                     }
-                    // Start request-response channel
-                    // 启动通道(请求-响应)
+                    // 启动通道(请求-响应) Start request-response channel
                     /**@see org.apache.rocketmq.remoting.netty.NettyRemotingClient#start()*/
-                    this.mQClientAPIImpl.start();       // NettyRemotingClient.start()   创建管道Channel
-                    // Start various schedule tasks
-                    // 开始多种计划任务
+                    this.mQClientAPIImpl.start();
+                    // 开始安排任务 Start various schedule tasks
                     this.startScheduledTask();
-                    // Start pull service
-                    // 启动拉取服务(创建、启动线程)
+                    // 启动异步线程处理拉消息请求 Start pull service
                     this.pullMessageService.start();
-                    // Start rebalance service
-                    // 启动平衡服务
+                    // 启动负载均衡服务 Start rebalance service
                     this.rebalanceService.start();
-                    // Start push service
-                    // 启动推送服务
-                    this.defaultMQProducer.getDefaultMQProducerImpl().start(false);  //启动mq producer 服务
+                    // 启动推送服务 Start push service
+                    this.defaultMQProducer.getDefaultMQProducerImpl().start(false);
                     log.info("the client factory [{}] start OK", this.clientId);
-                    this.serviceState = ServiceState.RUNNING;  // 服务状态：运行
+                    // 服务状态：运行
+                    this.serviceState = ServiceState.RUNNING;
                     break;
                 case RUNNING:
                     break;
@@ -979,6 +998,7 @@ public class MQClientInstance {
         this.rebalanceService.wakeup();
     }
 
+    //遍历所有消费客户端，执行DefaultMQPushConsumerImpl.doRebalance()
     public void doRebalance() {
         for (Map.Entry<String, MQConsumerInner> entry : this.consumerTable.entrySet()) {
             MQConsumerInner impl = entry.getValue();
@@ -996,6 +1016,9 @@ public class MQClientInstance {
         return this.producerTable.get(group);
     }
 
+    /**
+     *  查询mq消费
+     */
     public MQConsumerInner selectConsumer(final String group) {
         return this.consumerTable.get(group);
     }

@@ -60,6 +60,8 @@ public class ClientRemotingProcessor implements NettyRequestProcessor {
         RemotingCommand request) throws RemotingCommandException {
         switch (request.getCode()) {
             case RequestCode.CHECK_TRANSACTION_STATE:
+                //校验事务消息生产者的事务状态，使用事务校验线程异步处理，
+                //调用事务校验回调函数检查事务状态，根据本地事务状态发送事务状态对应的处理方式消息给broker
                 return this.checkTransactionState(ctx, request);
             case RequestCode.NOTIFY_CONSUMER_IDS_CHANGED:
                 return this.notifyConsumerIdsChanged(ctx, request);

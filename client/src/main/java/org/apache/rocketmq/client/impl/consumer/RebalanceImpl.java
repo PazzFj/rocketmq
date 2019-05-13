@@ -45,13 +45,12 @@ import org.apache.rocketmq.common.protocol.heartbeat.SubscriptionData;
  */
 public abstract class RebalanceImpl {
     protected static final InternalLogger log = ClientLogger.getLog();
+    // 消息队列 => 处理队列
     protected final ConcurrentMap<MessageQueue, ProcessQueue> processQueueTable = new ConcurrentHashMap<MessageQueue, ProcessQueue>(64);
-    protected final ConcurrentMap<String/* topic */, Set<MessageQueue>> topicSubscribeInfoTable =
-        new ConcurrentHashMap<String, Set<MessageQueue>>();
-    protected final ConcurrentMap<String /* topic */, SubscriptionData> subscriptionInner =
-        new ConcurrentHashMap<String, SubscriptionData>();
-    protected String consumerGroup;
-    protected MessageModel messageModel;
+    protected final ConcurrentMap<String/* topic */, Set<MessageQueue>> topicSubscribeInfoTable = new ConcurrentHashMap<String, Set<MessageQueue>>();
+    protected final ConcurrentMap<String, SubscriptionData> subscriptionInner = new ConcurrentHashMap<String, SubscriptionData>();
+    protected String consumerGroup; // 消费组
+    protected MessageModel messageModel;    //消息模式(广播, 集群)
     protected AllocateMessageQueueStrategy allocateMessageQueueStrategy;
     protected MQClientInstance mQClientFactory;
 
@@ -328,6 +327,9 @@ public abstract class RebalanceImpl {
         }
     }
 
+    /**
+     * 在平衡的时候修改处理队列表
+     */
     private boolean updateProcessQueueTableInRebalance(final String topic, final Set<MessageQueue> mqSet,
         final boolean isOrder) {
         boolean changed = false;
@@ -367,26 +369,35 @@ public abstract class RebalanceImpl {
         }
 
         List<PullRequest> pullRequestList = new ArrayList<PullRequest>();
+        // 遍历分配给topic的MessageQueue
         for (MessageQueue mq : mqSet) {
             if (!this.processQueueTable.containsKey(mq)) {
+                // 没有消费缓存快照的，则需要组装PullRequest，拉取消息放入缓存快照中
                 if (isOrder && !this.lock(mq)) {
+                    // 顺序topic需要先加锁
                     log.warn("doRebalance, {}, add a new mq failed, {}, because lock failed", consumerGroup, mq);
                     continue;
                 }
 
                 this.removeDirtyOffset(mq);
+                // 创建队列消费快照
                 ProcessQueue pq = new ProcessQueue();
+                //计算首次消费的偏移量
                 long nextOffset = this.computePullFromWhere(mq);
                 if (nextOffset >= 0) {
                     ProcessQueue pre = this.processQueueTable.putIfAbsent(mq, pq);
-                    if (pre != null) {
+                    if (pre != null) {  //防止并发
                         log.info("doRebalance, {}, mq already exists, {}", consumerGroup, mq);
                     } else {
                         log.info("doRebalance, {}, add a new mq, {}", consumerGroup, mq);
                         PullRequest pullRequest = new PullRequest();
+                        //消费组
                         pullRequest.setConsumerGroup(consumerGroup);
+                        //消费偏移量
                         pullRequest.setNextOffset(nextOffset);
+                        //消息队列
                         pullRequest.setMessageQueue(mq);
+                        //消息缓存快照，拉取消息后本地缓存，等待业务方消费
                         pullRequest.setProcessQueue(pq);
                         pullRequestList.add(pullRequest);
                         changed = true;
@@ -397,6 +408,7 @@ public abstract class RebalanceImpl {
             }
         }
 
+        // 发送拉取请求
         this.dispatchPullRequest(pullRequestList);
 
         return changed;
@@ -413,6 +425,9 @@ public abstract class RebalanceImpl {
 
     public abstract long computePullFromWhere(final MessageQueue mq);
 
+    /**
+     * 发送拉取请求
+     */
     public abstract void dispatchPullRequest(final List<PullRequest> pullRequestList);
 
     public void removeProcessQueue(final MessageQueue mq) {
