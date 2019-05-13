@@ -48,6 +48,7 @@ import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
 
 public class ClientRemotingProcessor implements NettyRequestProcessor {
+
     private final InternalLogger log = ClientLogger.getLog();
     private final MQClientInstance mqClientFactory;
 
@@ -55,25 +56,30 @@ public class ClientRemotingProcessor implements NettyRequestProcessor {
         this.mqClientFactory = mqClientFactory;
     }
 
+    /**
+     * 处理请求
+     */
     @Override
-    public RemotingCommand processRequest(ChannelHandlerContext ctx,
-        RemotingCommand request) throws RemotingCommandException {
+    public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws RemotingCommandException {
         switch (request.getCode()) {
-            case RequestCode.CHECK_TRANSACTION_STATE:
+
+            case RequestCode.CHECK_TRANSACTION_STATE:           //检查事务状态
                 //校验事务消息生产者的事务状态，使用事务校验线程异步处理，
                 //调用事务校验回调函数检查事务状态，根据本地事务状态发送事务状态对应的处理方式消息给broker
                 return this.checkTransactionState(ctx, request);
-            case RequestCode.NOTIFY_CONSUMER_IDS_CHANGED:
+
+            case RequestCode.NOTIFY_CONSUMER_IDS_CHANGED:       //通知消费端id改变
                 return this.notifyConsumerIdsChanged(ctx, request);
-            case RequestCode.RESET_CONSUMER_CLIENT_OFFSET:
+            case RequestCode.RESET_CONSUMER_CLIENT_OFFSET:      //重置客户端偏移量
                 return this.resetOffset(ctx, request);
-            case RequestCode.GET_CONSUMER_STATUS_FROM_CLIENT:
+
+            case RequestCode.GET_CONSUMER_STATUS_FROM_CLIENT:   //从客户端获取用户状态
                 return this.getConsumeStatus(ctx, request);
 
-            case RequestCode.GET_CONSUMER_RUNNING_INFO:
+            case RequestCode.GET_CONSUMER_RUNNING_INFO:         // 获取用户运行信息
                 return this.getConsumerRunningInfo(ctx, request);
 
-            case RequestCode.CONSUME_MESSAGE_DIRECTLY:
+            case RequestCode.CONSUME_MESSAGE_DIRECTLY:          //直接消费信息
                 return this.consumeMessageDirectly(ctx, request);
             default:
                 break;
@@ -86,10 +92,11 @@ public class ClientRemotingProcessor implements NettyRequestProcessor {
         return false;
     }
 
-    public RemotingCommand checkTransactionState(ChannelHandlerContext ctx,
-        RemotingCommand request) throws RemotingCommandException {
-        final CheckTransactionStateRequestHeader requestHeader =
-            (CheckTransactionStateRequestHeader) request.decodeCommandCustomHeader(CheckTransactionStateRequestHeader.class);
+    /**
+     * 检查事务状态
+     */
+    public RemotingCommand checkTransactionState(ChannelHandlerContext ctx, RemotingCommand request) throws RemotingCommandException {
+        final CheckTransactionStateRequestHeader requestHeader = (CheckTransactionStateRequestHeader) request.decodeCommandCustomHeader(CheckTransactionStateRequestHeader.class);
         final ByteBuffer byteBuffer = ByteBuffer.wrap(request.getBody());
         final MessageExt messageExt = MessageDecoder.decode(byteBuffer);
         if (messageExt != null) {

@@ -21,7 +21,7 @@ import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 
 /**
- * Base class for background thread
+ * 后台线程的基类
  */
 public abstract class ServiceThread implements Runnable {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);
@@ -35,12 +35,17 @@ public abstract class ServiceThread implements Runnable {
         this.thread = new Thread(this, this.getServiceName());
     }
 
+    /**
+     * 获取服务名称
+     */
     public abstract String getServiceName();
 
+    //启动
     public void start() {
         this.thread.start();
     }
 
+    //关闭
     public void shutdown() {
         this.shutdown(false);
     }

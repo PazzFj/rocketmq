@@ -18,6 +18,12 @@ package org.apache.rocketmq.remoting;
 
 import org.apache.rocketmq.remoting.exception.RemotingCommandException;
 
+/**
+ * 命令定制头部
+ */
 public interface CommandCustomHeader {
+
+    // 检测topic过滤类型 (单一标签, 多标签)
     void checkFields() throws RemotingCommandException;
+
 }

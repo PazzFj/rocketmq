@@ -24,20 +24,23 @@ import org.apache.rocketmq.remoting.InvokeCallback;
 import org.apache.rocketmq.remoting.common.SemaphoreReleaseOnlyOnce;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
+/**
+ * 响应
+ */
 public class ResponseFuture {
-    private final int opaque;
-    private final Channel processChannel;
-    private final long timeoutMillis;
-    private final InvokeCallback invokeCallback;
-    private final long beginTimestamp = System.currentTimeMillis();
-    private final CountDownLatch countDownLatch = new CountDownLatch(1);
+    private final int opaque; //请求id
+    private final Channel processChannel;   //通道
+    private final long timeoutMillis;   //时间
+    private final InvokeCallback invokeCallback; //回调
+    private final long beginTimestamp = System.currentTimeMillis(); //创建时间
+    private final CountDownLatch countDownLatch = new CountDownLatch(1);  //计算器
 
     private final SemaphoreReleaseOnlyOnce once;
 
     private final AtomicBoolean executeCallbackOnlyOnce = new AtomicBoolean(false);
     private volatile RemotingCommand responseCommand;
-    private volatile boolean sendRequestOK = true;
-    private volatile Throwable cause;
+    private volatile boolean sendRequestOK = true;      // 发送请求成功
+    private volatile Throwable cause;                   // 异常
 
     public ResponseFuture(Channel channel, int opaque, long timeoutMillis, InvokeCallback invokeCallback,
         SemaphoreReleaseOnlyOnce once) {
@@ -68,6 +71,7 @@ public class ResponseFuture {
     }
 
     public RemotingCommand waitResponse(final long timeoutMillis) throws InterruptedException {
+        // 使当前线程等待直到锁存器计数到零为止，除非线程 interrupted(中断)或指定的等待时间过去
         this.countDownLatch.await(timeoutMillis, TimeUnit.MILLISECONDS);
         return this.responseCommand;
     }

@@ -20,9 +20,9 @@ import org.apache.rocketmq.common.constant.PermName;
 
 public class TopicConfig {
     private static final String SEPARATOR = " ";
-    public static int defaultReadQueueNums = 16;
-    public static int defaultWriteQueueNums = 16;
-    private String topicName;
+    public static int defaultReadQueueNums = 16;    // 默认读取队列数量
+    public static int defaultWriteQueueNums = 16;   // 默认写入队列数量
+    private String topicName;   // 名称
     private int readQueueNums = defaultReadQueueNums;
     private int writeQueueNums = defaultWriteQueueNums;
     private int perm = PermName.PERM_READ | PermName.PERM_WRITE;

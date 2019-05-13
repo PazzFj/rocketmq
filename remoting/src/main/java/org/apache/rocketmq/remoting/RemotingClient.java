@@ -48,7 +48,7 @@ public interface RemotingClient extends RemotingService {
     void invokeOneway(final String addr, final RemotingCommand request, final long timeoutMillis)
         throws InterruptedException, RemotingConnectException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException;
 
-    // 注册处理
+    // 注册处理(请求码, ClientRemotingProcessor)
     void registerProcessor(final int requestCode, final NettyRequestProcessor processor, final ExecutorService executor);
 
     // 设置回调执行器

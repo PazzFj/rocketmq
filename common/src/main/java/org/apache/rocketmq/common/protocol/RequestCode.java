@@ -17,16 +17,24 @@
 
 package org.apache.rocketmq.common.protocol;
 
+/**
+ * 请求码
+ */
 public class RequestCode {
 
+    //发送消息
     public static final int SEND_MESSAGE = 10;
 
+    //拉取消息
     public static final int PULL_MESSAGE = 11;
 
+    //查询消息
     public static final int QUERY_MESSAGE = 12;
     public static final int QUERY_BROKER_OFFSET = 13;
     public static final int QUERY_CONSUMER_OFFSET = 14;
     public static final int UPDATE_CONSUMER_OFFSET = 15;
+
+    //修改与创建Topic
     public static final int UPDATE_AND_CREATE_TOPIC = 17;
     public static final int GET_ALL_TOPIC_CONFIG = 21;
     public static final int GET_TOPIC_CONFIG_LIST = 22;
@@ -57,8 +65,9 @@ public class RequestCode {
     public static final int END_TRANSACTION = 37;
     public static final int GET_CONSUMER_LIST_BY_GROUP = 38;
 
+    //检查事务状态
     public static final int CHECK_TRANSACTION_STATE = 39;
-
+    //通知消费id改变
     public static final int NOTIFY_CONSUMER_IDS_CHANGED = 40;
 
     public static final int LOCK_BATCH_MQ = 41;
@@ -109,8 +118,10 @@ public class RequestCode {
     public static final int DELETE_TOPIC_IN_NAMESRV = 216;
     public static final int GET_KVLIST_BY_NAMESPACE = 219;
 
+    //重置客户端偏移量
     public static final int RESET_CONSUMER_CLIENT_OFFSET = 220;
 
+    //从客户端获取用户状态
     public static final int GET_CONSUMER_STATUS_FROM_CLIENT = 221;
 
     public static final int INVOKE_BROKER_TO_RESET_OFFSET = 222;
@@ -131,9 +142,11 @@ public class RequestCode {
 
     public static final int CLEAN_EXPIRED_CONSUMEQUEUE = 306;
 
+    //获取用户运行信息
     public static final int GET_CONSUMER_RUNNING_INFO = 307;
 
     public static final int QUERY_CORRECTION_OFFSET = 308;
+    //直接消费信息
     public static final int CONSUME_MESSAGE_DIRECTLY = 309;
 
     public static final int SEND_MESSAGE_V2 = 310;

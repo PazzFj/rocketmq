@@ -25,22 +25,25 @@ import org.apache.rocketmq.remoting.CommandCustomHeader;
 import org.apache.rocketmq.remoting.annotation.CFNotNull;
 import org.apache.rocketmq.remoting.exception.RemotingCommandException;
 
+/**
+ * 创建Topic请求数据头
+ */
 public class CreateTopicRequestHeader implements CommandCustomHeader {
     @CFNotNull
-    private String topic;
+    private String topic;   // topic
     @CFNotNull
-    private String defaultTopic;
+    private String defaultTopic;    //默认topic
     @CFNotNull
-    private Integer readQueueNums;
+    private Integer readQueueNums;  // 读取队列数
     @CFNotNull
-    private Integer writeQueueNums;
+    private Integer writeQueueNums; // 写入队列数
     @CFNotNull
-    private Integer perm;
+    private Integer perm;           // 页
     @CFNotNull
-    private String topicFilterType;
-    private Integer topicSysFlag;
+    private String topicFilterType; //topic过滤类型(单一的标签, 多标签)
+    private Integer topicSysFlag;   //topic系统文件标识
     @CFNotNull
-    private Boolean order = false;
+    private Boolean order = false;  //顺序
 
     @Override
     public void checkFields() throws RemotingCommandException {

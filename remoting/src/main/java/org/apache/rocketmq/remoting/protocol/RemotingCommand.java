@@ -31,6 +31,9 @@ import org.apache.rocketmq.remoting.exception.RemotingCommandException;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 
+/**
+ * 远程处理命令 (使用该对象作为传递)
+ */
 public class RemotingCommand {
     public static final String SERIALIZE_TYPE_PROPERTY = "rocketmq.serialize.type";
     public static final String SERIALIZE_TYPE_ENV = "ROCKETMQ_SERIALIZE_TYPE";
@@ -38,8 +41,7 @@ public class RemotingCommand {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);
     private static final int RPC_TYPE = 0; // 0, REQUEST_COMMAND
     private static final int RPC_ONEWAY = 1; // 0, RPC
-    private static final Map<Class<? extends CommandCustomHeader>, Field[]> CLASS_HASH_MAP =
-        new HashMap<Class<? extends CommandCustomHeader>, Field[]>();
+    private static final Map<Class<? extends CommandCustomHeader>, Field[]> CLASS_HASH_MAP = new HashMap<Class<? extends CommandCustomHeader>, Field[]>();
     private static final Map<Class, String> CANONICAL_NAME_CACHE = new HashMap<Class, String>();
     // 1, Oneway
     // 1, RESPONSE_COMMAND
@@ -69,22 +71,30 @@ public class RemotingCommand {
         }
     }
 
+    // 请求码
     private int code;
     private LanguageCode language = LanguageCode.JAVA;
     private int version = 0;
-    private int opaque = requestId.getAndIncrement();
+    private int opaque = requestId.getAndIncrement();   //请求id
     private int flag = 0;
-    private String remark;
+    private String remark;  //备注
     private HashMap<String, String> extFields;
+
+    //命令定制头部 (CreateTopicRequestHeader)
     private transient CommandCustomHeader customHeader;
 
+    //序列类型 (json*, rocketmq)
     private SerializeType serializeTypeCurrentRPC = serializeTypeConfigInThisServer;
 
+    // 文本内容
     private transient byte[] body;
 
     protected RemotingCommand() {
     }
 
+    /**
+     * 创建请求命令 (参数 CommandCustomHeader => CreateTopicRequestHeader )
+     */
     public static RemotingCommand createRequestCommand(int code, CommandCustomHeader customHeader) {
         RemotingCommand cmd = new RemotingCommand();
         cmd.setCode(code);
@@ -93,6 +103,9 @@ public class RemotingCommand {
         return cmd;
     }
 
+    /**
+     * 设置cmd版本
+     */
     private static void setCmdVersion(RemotingCommand cmd) {
         if (configVersion >= 0) {
             cmd.setVersion(configVersion);
@@ -106,12 +119,17 @@ public class RemotingCommand {
         }
     }
 
+    /**
+     * 创建响应命令
+     */
     public static RemotingCommand createResponseCommand(Class<? extends CommandCustomHeader> classHeader) {
         return createResponseCommand(RemotingSysResponseCode.SYSTEM_ERROR, "not set any response code", classHeader);
     }
 
-    public static RemotingCommand createResponseCommand(int code, String remark,
-        Class<? extends CommandCustomHeader> classHeader) {
+    /**
+     * 创建响应命令
+     */
+    public static RemotingCommand createResponseCommand(int code, String remark, Class<? extends CommandCustomHeader> classHeader) {
         RemotingCommand cmd = new RemotingCommand();
         cmd.markResponseType();
         cmd.setCode(code);
@@ -132,6 +150,9 @@ public class RemotingCommand {
         return cmd;
     }
 
+    /**
+     * 创建响应命令
+     */
     public static RemotingCommand createResponseCommand(int code, String remark) {
         return createResponseCommand(code, remark, null);
     }
@@ -166,6 +187,9 @@ public class RemotingCommand {
         return length & 0xFFFFFF;
     }
 
+    /**
+     * 通过字节流创建 远程命令RemotingCommand 对象
+     */
     private static RemotingCommand headerDecode(byte[] headerData, SerializeType type) {
         switch (type) {
             case JSON:
@@ -429,6 +453,7 @@ public class RemotingCommand {
         return result;
     }
 
+    // 标记为单向RPC
     public void markOnewayRPC() {
         int bits = 1 << RPC_ONEWAY;
         this.flag |= bits;
