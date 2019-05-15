@@ -27,82 +27,33 @@ import org.apache.rocketmq.remoting.common.RemotingHelper;
  */
 public class Producer {
     public static void main(String[] args) throws Exception {
-        producerSync();
 
-//        producerAsync();
-
-//        producerOneway();
-    }
-
-    public static void producerSync() throws Exception {
-        DefaultMQProducer producer = new DefaultMQProducer("SYNC-NAME");
-
-        producer.setNamesrvAddr("47.101.167.134:9876");
+        DefaultMQProducer producer = new DefaultMQProducer("example_group_name");
+        producer.setNamesrvAddr("192.168.175.130:9876");
         producer.setVipChannelEnabled(false);
-
         producer.start();
-        for (int i = 0; i < 10; i++) {
-            try {
-                Message msg = new Message("TopicTest", "TagA", ("SYNC Hello RocketMQ " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
-
-                SendResult sendResult = producer.send(msg);
-
-                System.out.printf("%s%n", sendResult);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Thread.sleep(1000);
-            }
-        }
-
-        producer.shutdown();
-    }
-
-    public static void producerAsync() throws Exception {
-        DefaultMQProducer producer = new DefaultMQProducer("ASYNC-NAME");
-
-        producer.setNamesrvAddr("47.101.167.134:9876");
-        producer.setVipChannelEnabled(false);
-
-        producer.start();
+        producer.setRetryTimesWhenSendAsyncFailed(0); //失败重试时间
         for (int i = 0; i < 10; i++) {
             final int index = i;
-            try {
-                Message msg = new Message("TopicTest", "TagB", "OrderID188", ("ASYNC Hello RocketMQ " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
-
-                producer.send(msg, new SendCallback() {
-                    @Override
-                    public void onSuccess(SendResult sendResult) {
-                        System.out.printf("%-10d OK %s %n", index, sendResult.getMsgId());
-                    }
-
-                    @Override
-                    public void onException(Throwable e) {
-                        System.out.printf("%s%n", e.getMessage());
-                    }
-                }, 3000);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                Thread.sleep(1000);
-            }
+            Message msgA = new Message("TopicTestA", "TagA", ("A Hello world " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
+            Message msgB = new Message("TopicTestB", "TagB", ("B Hello world " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
+            Message msgC = new Message("TopicTestC", "TagC", ("C Hello world " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
+            SendResult sendResult = producer.send(msgA);
+            System.out.println("sync: " + sendResult.getMsgId());
+            producer.send(msgB, new SendCallback() {
+                @Override
+                public void onSuccess(SendResult sendResult) {
+                    System.out.println("async: " + sendResult.getMsgId());
+                }
+                @Override
+                public void onException(Throwable e) {
+                    System.out.println("no");
+                    e.printStackTrace();
+                }
+            });
+            producer.sendOneway(msgC);
         }
-
         producer.shutdown();
     }
 
-    public static void producerOneway() throws Exception{
-        DefaultMQProducer producer = new DefaultMQProducer("ONE-WAY-NAME");
-
-        producer.setNamesrvAddr("47.101.167.134:9876");
-        producer.setVipChannelEnabled(false);
-
-        producer.start();
-
-        for (int i = 0; i < 10; i++) {
-            Message msg = new Message("TopicTest", "TagC", ("ONE-WAY Hello RocketMQ " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
-            producer.sendOneway(msg);
-        }
-
-        producer.shutdown();
-    }
 }

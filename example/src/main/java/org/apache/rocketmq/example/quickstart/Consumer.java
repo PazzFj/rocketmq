@@ -31,11 +31,13 @@ public class Consumer {
     }
 
     public static void consumerSubscribe() throws Exception{
-        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("ONE-WAY-NAME");
-        consumer.setNamesrvAddr("47.101.167.134:9876");
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("example_group_name");
+        consumer.setNamesrvAddr("192.168.175.130:9876");
 
         consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_LAST_OFFSET);
-        consumer.subscribe("TopicTest", "*");
+        consumer.subscribe("TopicTestA", "*");
+        consumer.subscribe("TopicTestB", "*");
+        consumer.subscribe("TopicTestC", "*");
 
         consumer.registerMessageListener((MessageListenerConcurrently) (msgs, text) -> {
             msgs.forEach(message -> {

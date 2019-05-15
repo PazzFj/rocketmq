@@ -19,11 +19,14 @@ package org.apache.rocketmq.client.consumer.listener;
 import org.apache.rocketmq.common.message.MessageQueue;
 
 /**
- * Consumer Orderly consumption context
+ * 消费者有序消费上下文
  */
 public class ConsumeOrderlyContext {
+    //消息队列
     private final MessageQueue messageQueue;
+    //自动提交
     private boolean autoCommit = true;
+    //推迟当前队列时间
     private long suspendCurrentQueueTimeMillis = -1;
 
     public ConsumeOrderlyContext(MessageQueue messageQueue) {

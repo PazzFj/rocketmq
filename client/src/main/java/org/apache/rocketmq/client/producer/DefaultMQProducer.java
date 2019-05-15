@@ -61,7 +61,7 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
     private int sendMsgTimeout = 3000;                  // 发送消息超时 (3秒)
     private int compressMsgBodyOverHowmuch = 1024 * 4;
     private int retryTimesWhenSendFailed = 2;           // 重试发送失败时间
-    private int retryTimesWhenSendAsyncFailed = 2;      // 重试异步发送失败时间
+    private int retryTimesWhenSendAsyncFailed = 2;      // 失败异步重试发送时间
     private boolean retryAnotherBrokerWhenNotStoreOK = false;       // 重试不同Broker在不储存Ok
     private int maxMessageSize = 1024 * 1024 * 4;       // 最大消息大小
     private TraceDispatcher traceDispatcher = null;     // 追踪调度程序
