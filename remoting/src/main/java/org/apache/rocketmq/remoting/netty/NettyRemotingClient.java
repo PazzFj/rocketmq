@@ -88,6 +88,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
 
     private final Timer timer = new Timer("ClientHouseKeepingService", true);
 
+    // 储存远程服务ip
     private final AtomicReference<List<String>> namesrvAddrList = new AtomicReference<List<String>>();
     private final AtomicReference<String> namesrvAddrChoosed = new AtomicReference<String>();
     private final AtomicInteger namesrvIndex = new AtomicInteger(initValueIndex());

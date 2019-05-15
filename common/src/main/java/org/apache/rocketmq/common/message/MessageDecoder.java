@@ -255,18 +255,18 @@ public class MessageDecoder {
                 msgExt = new MessageExt();
             }
 
-            // 1 TOTALSIZE
+            // 1 TOTALSIZE 总空间
             int storeSize = byteBuffer.getInt();
             msgExt.setStoreSize(storeSize);
 
             // 2 MAGICCODE
             byteBuffer.getInt();
 
-            // 3 BODYCRC
+            // 3 BODYCRC消息体
             int bodyCRC = byteBuffer.getInt();
             msgExt.setBodyCRC(bodyCRC);
 
-            // 4 QUEUEID
+            // 4 QUEUEID队列
             int queueId = byteBuffer.getInt();
             msgExt.setQueueId(queueId);
 

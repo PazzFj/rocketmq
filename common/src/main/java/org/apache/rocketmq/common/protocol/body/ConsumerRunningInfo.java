@@ -28,12 +28,12 @@ import org.apache.rocketmq.common.protocol.heartbeat.SubscriptionData;
 import org.apache.rocketmq.remoting.protocol.RemotingSerializable;
 
 public class ConsumerRunningInfo extends RemotingSerializable {
-    public static final String PROP_NAMESERVER_ADDR = "PROP_NAMESERVER_ADDR";
-    public static final String PROP_THREADPOOL_CORE_SIZE = "PROP_THREADPOOL_CORE_SIZE";
-    public static final String PROP_CONSUME_ORDERLY = "PROP_CONSUMEORDERLY";
-    public static final String PROP_CONSUME_TYPE = "PROP_CONSUME_TYPE";
-    public static final String PROP_CLIENT_VERSION = "PROP_CLIENT_VERSION";
-    public static final String PROP_CONSUMER_START_TIMESTAMP = "PROP_CONSUMER_START_TIMESTAMP";
+    public static final String PROP_NAMESERVER_ADDR = "PROP_NAMESERVER_ADDR";       // 服务ip
+    public static final String PROP_THREADPOOL_CORE_SIZE = "PROP_THREADPOOL_CORE_SIZE";     //  线程池大小
+    public static final String PROP_CONSUME_ORDERLY = "PROP_CONSUMEORDERLY";        // 消费顺序
+    public static final String PROP_CONSUME_TYPE = "PROP_CONSUME_TYPE";             // 消费类型
+    public static final String PROP_CLIENT_VERSION = "PROP_CLIENT_VERSION";         // 客户端版本
+    public static final String PROP_CONSUMER_START_TIMESTAMP = "PROP_CONSUMER_START_TIMESTAMP"; // 消费开始时间戳
 
     private Properties properties = new Properties();
 
@@ -43,7 +43,7 @@ public class ConsumerRunningInfo extends RemotingSerializable {
 
     private TreeMap<String/* Topic */, ConsumeStatus> statusTable = new TreeMap<String, ConsumeStatus>();
 
-    private String jstack;
+    private String jstack;      //命令详解
 
     public static boolean analyzeSubscription(final TreeMap<String/* clientId */, ConsumerRunningInfo> criTable) {
         ConsumerRunningInfo prev = criTable.firstEntry().getValue();

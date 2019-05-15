@@ -177,6 +177,11 @@ public class MQClientInstance {
     }
 
 
+    /**
+     * 创建TopicPublishInfo (MessageQueue 集合,  TopicRouteData 路线数据(ip, QueueData 集合   BrokerData 集合) )
+     * 通过 TopicRouteData 创建 TopicPublishInfo
+     *
+     */
     public static TopicPublishInfo topicRouteData2TopicPublishInfo(final String topic, final TopicRouteData route) {
         TopicPublishInfo info = new TopicPublishInfo();
         info.setTopicRouteData(route);
@@ -186,12 +191,13 @@ public class MQClientInstance {
                 String[] item = broker.split(":");
                 int nums = Integer.parseInt(item[1]);
                 for (int i = 0; i < nums; i++) {
+                    // 创建消息队列(topic, ip, requestId)
                     MessageQueue mq = new MessageQueue(topic, item[0], i);
                     info.getMessageQueueList().add(mq);
                 }
             }
-
-            info.setOrderTopic(true);
+            // 设置顺序
+            info.setOrderTopic(true);// 设置顺序
         } else {
             List<QueueData> qds = route.getQueueDatas();
             Collections.sort(qds);
@@ -220,7 +226,8 @@ public class MQClientInstance {
                 }
             }
 
-            info.setOrderTopic(false);
+            // 不设置顺序
+            info.setOrderTopic(false); // 不设置顺序
         }
 
         return info;
@@ -626,8 +633,7 @@ public class MQClientInstance {
         }
     }
 
-    public boolean updateTopicRouteInfoFromNameServer(final String topic, boolean isDefault,
-        DefaultMQProducer defaultMQProducer) {
+    public boolean updateTopicRouteInfoFromNameServer(final String topic, boolean isDefault, DefaultMQProducer defaultMQProducer) {
         try {
             if (this.lockNamesrv.tryLock(LOCK_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)) {
                 try {
@@ -1134,6 +1140,9 @@ public class MQClientInstance {
         return null;
     }
 
+    /**
+     * 重置消费客户端偏移量
+     */
     public void resetOffset(String topic, String group, Map<MessageQueue, Long> offsetTable) {
         DefaultMQPushConsumerImpl consumer = null;
         try {
@@ -1227,9 +1236,10 @@ public class MQClientInstance {
         return topicRouteTable;
     }
 
-    public ConsumeMessageDirectlyResult consumeMessageDirectly(final MessageExt msg,
-        final String consumerGroup,
-        final String brokerName) {
+    /**
+     * 直接消费信息
+     */
+    public ConsumeMessageDirectlyResult consumeMessageDirectly(final MessageExt msg, final String consumerGroup, final String brokerName) {
         MQConsumerInner mqConsumerInner = this.consumerTable.get(consumerGroup);
         if (null != mqConsumerInner) {
             DefaultMQPushConsumerImpl consumer = (DefaultMQPushConsumerImpl) mqConsumerInner;
@@ -1241,6 +1251,9 @@ public class MQClientInstance {
         return null;
     }
 
+    /**
+     * 获取消费运行信息
+     */
     public ConsumerRunningInfo consumerRunningInfo(final String consumerGroup) {
         MQConsumerInner mqConsumerInner = this.consumerTable.get(consumerGroup);
 
@@ -1258,8 +1271,7 @@ public class MQClientInstance {
         String nsAddr = strBuilder.toString();
         consumerRunningInfo.getProperties().put(ConsumerRunningInfo.PROP_NAMESERVER_ADDR, nsAddr);
         consumerRunningInfo.getProperties().put(ConsumerRunningInfo.PROP_CONSUME_TYPE, mqConsumerInner.consumeType().name());
-        consumerRunningInfo.getProperties().put(ConsumerRunningInfo.PROP_CLIENT_VERSION,
-            MQVersion.getVersionDesc(MQVersion.CURRENT_VERSION));
+        consumerRunningInfo.getProperties().put(ConsumerRunningInfo.PROP_CLIENT_VERSION, MQVersion.getVersionDesc(MQVersion.CURRENT_VERSION));
 
         return consumerRunningInfo;
     }

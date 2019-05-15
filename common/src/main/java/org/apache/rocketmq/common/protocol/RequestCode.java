@@ -121,7 +121,7 @@ public class RequestCode {
     //重置客户端偏移量
     public static final int RESET_CONSUMER_CLIENT_OFFSET = 220;
 
-    //从客户端获取用户状态
+    //从客户端获取消费状态
     public static final int GET_CONSUMER_STATUS_FROM_CLIENT = 221;
 
     public static final int INVOKE_BROKER_TO_RESET_OFFSET = 222;

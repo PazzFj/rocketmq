@@ -22,13 +22,16 @@ import org.apache.rocketmq.remoting.annotation.CFNotNull;
 import org.apache.rocketmq.remoting.annotation.CFNullable;
 import org.apache.rocketmq.remoting.exception.RemotingCommandException;
 
+/**
+ *
+ */
 public class GetConsumerRunningInfoRequestHeader implements CommandCustomHeader {
     @CFNotNull
-    private String consumerGroup;
+    private String consumerGroup;   //消费组
     @CFNotNull
-    private String clientId;
+    private String clientId;        //客户端ip
     @CFNullable
-    private boolean jstackEnable;
+    private boolean jstackEnable;   //
 
     @Override
     public void checkFields() throws RemotingCommandException {

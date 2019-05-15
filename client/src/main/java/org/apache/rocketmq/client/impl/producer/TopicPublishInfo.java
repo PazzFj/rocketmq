@@ -27,11 +27,15 @@ import org.apache.rocketmq.common.protocol.route.TopicRouteData;
  * topic发布信息
  */
 public class TopicPublishInfo {
-    private boolean orderTopic = false; //
+    private boolean orderTopic = false;     // 根据 TopicRouteData 中的 orderTopicConf 来设置顺序
     private boolean haveTopicRouterInfo = false;
-    private List<MessageQueue> messageQueueList = new ArrayList<MessageQueue>();
+
+    private List<MessageQueue> messageQueueList = new ArrayList<MessageQueue>();    // 消息队列集合
+
+    // 保证下标
     private volatile ThreadLocalIndex sendWhichQueue = new ThreadLocalIndex();
-    private TopicRouteData topicRouteData;
+
+    private TopicRouteData topicRouteData;  // 主题路线数据
 
     public boolean isOrderTopic() {
         return orderTopic;

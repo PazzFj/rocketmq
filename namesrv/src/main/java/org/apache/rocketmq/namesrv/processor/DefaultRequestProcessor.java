@@ -67,8 +67,7 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
     }
 
     @Override
-    public RemotingCommand processRequest(ChannelHandlerContext ctx,
-        RemotingCommand request) throws RemotingCommandException {
+    public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws RemotingCommandException {
 
         if (ctx != null) {
             log.debug("receive request, {} {} {}",
@@ -76,7 +75,6 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
                 RemotingHelper.parseChannelRemoteAddr(ctx.channel()),
                 request);
         }
-
 
         switch (request.getCode()) {
             case RequestCode.PUT_KV_CONFIG:
@@ -250,8 +248,7 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
         return true;
     }
 
-    public RemotingCommand queryBrokerTopicConfig(ChannelHandlerContext ctx,
-        RemotingCommand request) throws RemotingCommandException {
+    public RemotingCommand queryBrokerTopicConfig(ChannelHandlerContext ctx, RemotingCommand request) throws RemotingCommandException {
         final RemotingCommand response = RemotingCommand.createResponseCommand(QueryDataVersionResponseHeader.class);
         final QueryDataVersionResponseHeader responseHeader = (QueryDataVersionResponseHeader) response.readCustomHeader();
         final QueryDataVersionRequestHeader requestHeader =
@@ -334,19 +331,15 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
         return response;
     }
 
-    public RemotingCommand getRouteInfoByTopic(ChannelHandlerContext ctx,
-        RemotingCommand request) throws RemotingCommandException {
+    public RemotingCommand getRouteInfoByTopic(ChannelHandlerContext ctx, RemotingCommand request) throws RemotingCommandException {
         final RemotingCommand response = RemotingCommand.createResponseCommand(null);
-        final GetRouteInfoRequestHeader requestHeader =
-            (GetRouteInfoRequestHeader) request.decodeCommandCustomHeader(GetRouteInfoRequestHeader.class);
+        final GetRouteInfoRequestHeader requestHeader = (GetRouteInfoRequestHeader) request.decodeCommandCustomHeader(GetRouteInfoRequestHeader.class);
 
         TopicRouteData topicRouteData = this.namesrvController.getRouteInfoManager().pickupTopicRouteData(requestHeader.getTopic());
 
         if (topicRouteData != null) {
             if (this.namesrvController.getNamesrvConfig().isOrderMessageEnable()) {
-                String orderTopicConf =
-                    this.namesrvController.getKvConfigManager().getKVConfig(NamesrvUtil.NAMESPACE_ORDER_TOPIC_CONFIG,
-                        requestHeader.getTopic());
+                String orderTopicConf = this.namesrvController.getKvConfigManager().getKVConfig(NamesrvUtil.NAMESPACE_ORDER_TOPIC_CONFIG, requestHeader.getTopic());
                 topicRouteData.setOrderTopicConf(orderTopicConf);
             }
 
@@ -378,15 +371,11 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
         RemotingCommand request) throws RemotingCommandException {
         final RemotingCommand response = RemotingCommand.createResponseCommand(WipeWritePermOfBrokerResponseHeader.class);
         final WipeWritePermOfBrokerResponseHeader responseHeader = (WipeWritePermOfBrokerResponseHeader) response.readCustomHeader();
-        final WipeWritePermOfBrokerRequestHeader requestHeader =
-            (WipeWritePermOfBrokerRequestHeader) request.decodeCommandCustomHeader(WipeWritePermOfBrokerRequestHeader.class);
+        final WipeWritePermOfBrokerRequestHeader requestHeader = (WipeWritePermOfBrokerRequestHeader) request.decodeCommandCustomHeader(WipeWritePermOfBrokerRequestHeader.class);
 
         int wipeTopicCnt = this.namesrvController.getRouteInfoManager().wipeWritePermOfBrokerByLock(requestHeader.getBrokerName());
 
-        log.info("wipe write perm of broker[{}], client: {}, {}",
-            requestHeader.getBrokerName(),
-            RemotingHelper.parseChannelRemoteAddr(ctx.channel()),
-            wipeTopicCnt);
+        log.info("wipe write perm of broker[{}], client: {}, {}", requestHeader.getBrokerName(), RemotingHelper.parseChannelRemoteAddr(ctx.channel()), wipeTopicCnt);
 
         responseHeader.setWipeTopicCount(wipeTopicCnt);
         response.setCode(ResponseCode.SUCCESS);

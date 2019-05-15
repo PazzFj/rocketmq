@@ -37,17 +37,28 @@ public interface MQProducerInner {
      */
     boolean isPublishTopicNeedUpdate(final String topic);
 
+    /**
+     * 检测监听
+     */
     TransactionCheckListener checkListener();
 
-    // 获取事务监听
+    /**
+     * 获取事务监听
+     */
     TransactionListener getCheckListener();
 
-    // 检查事务状态
+    /**
+     * 检查事务状态
+     */
     void checkTransactionState(final String addr, final MessageExt msg, final CheckTransactionStateRequestHeader checkRequestHeader);
 
-    // 修改topic 发布信息
+    /**
+     * 修改topic 发布信息
+     */
     void updateTopicPublishInfo(final String topic, final TopicPublishInfo info);
 
-    // 是否单元模式
+    /**
+     * 是否单元模式
+     */
     boolean isUnitMode();
 }

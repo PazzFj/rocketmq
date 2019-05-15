@@ -25,27 +25,41 @@ import org.apache.rocketmq.remoting.exception.RemotingTooMuchRequestException;
 import org.apache.rocketmq.remoting.netty.NettyRequestProcessor;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
-//远程服务
+/**
+ * 远程服务
+ */
 public interface RemotingServer extends RemotingService {
 
-    void registerProcessor(final int requestCode, final NettyRequestProcessor processor,
-        final ExecutorService executor);
+    /**
+     * 注册处理器
+     */
+    void registerProcessor(final int requestCode, final NettyRequestProcessor processor, final ExecutorService executor);
 
+    /**
+     * 注册请求处理器
+     */
     void registerDefaultProcessor(final NettyRequestProcessor processor, final ExecutorService executor);
+
+    /**
+     * 执行同步
+     */
+    RemotingCommand invokeSync(final Channel channel, final RemotingCommand request, final long timeoutMillis)
+            throws InterruptedException, RemotingSendRequestException, RemotingTimeoutException;
+
+    /**
+     * 执行异步
+     */
+    void invokeAsync(final Channel channel, final RemotingCommand request, final long timeoutMillis,final InvokeCallback invokeCallback)
+            throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException;
+
+    /**
+     * 执行单向
+     */
+    void invokeOneway(final Channel channel, final RemotingCommand request, final long timeoutMillis)
+            throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException;
 
     int localListenPort();
 
     Pair<NettyRequestProcessor, ExecutorService> getProcessorPair(final int requestCode);
-
-    RemotingCommand invokeSync(final Channel channel, final RemotingCommand request, final long timeoutMillis) throws InterruptedException, RemotingSendRequestException,
-        RemotingTimeoutException;
-
-    void invokeAsync(final Channel channel, final RemotingCommand request, final long timeoutMillis,
-        final InvokeCallback invokeCallback) throws InterruptedException,
-        RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException;
-
-    void invokeOneway(final Channel channel, final RemotingCommand request, final long timeoutMillis)
-        throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException,
-        RemotingSendRequestException;
 
 }

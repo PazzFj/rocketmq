@@ -24,13 +24,13 @@ import org.apache.rocketmq.remoting.exception.RemotingCommandException;
 
 public class ConsumeMessageDirectlyResultRequestHeader implements CommandCustomHeader {
     @CFNotNull
-    private String consumerGroup;
+    private String consumerGroup; // 消费组名称
     @CFNullable
-    private String clientId;
+    private String clientId;      // 服务器ip
     @CFNullable
-    private String msgId;
+    private String msgId;         // 消费id
     @CFNullable
-    private String brokerName;
+    private String brokerName;    // broker 名称(在安装 RocketMQ 配置)
 
     @Override
     public void checkFields() throws RemotingCommandException {

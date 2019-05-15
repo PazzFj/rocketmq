@@ -33,6 +33,9 @@ public interface MQConsumerInner {
      */
     String groupName();
 
+    /**
+     * 消息类型(广播、集群)
+     */
     MessageModel messageModel();
 
     /**
@@ -65,9 +68,12 @@ public interface MQConsumerInner {
      */
     void updateTopicSubscribeInfo(final String topic, final Set<MessageQueue> info);
 
+    /**
+     * 获取消费运行信息
+     */
+    ConsumerRunningInfo consumerRunningInfo();
+
     boolean isSubscribeTopicNeedUpdate(final String topic);
 
     boolean isUnitMode();
-
-    ConsumerRunningInfo consumerRunningInfo();
 }

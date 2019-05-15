@@ -22,10 +22,12 @@ import java.io.Serializable;
  * 消息队列
  */
 public class MessageQueue implements Comparable<MessageQueue>, Serializable {
+
     private static final long serialVersionUID = 6191200464116433425L;
-    private String topic;   // 主题
-    private String brokerName;  // broker名称
-    private int queueId;    // 队列id
+
+    private String topic;       // topic
+    private String brokerName;  // ip地址
+    private int queueId;        // 队列id  (0 ~ 端口号)
 
     public MessageQueue() {
 

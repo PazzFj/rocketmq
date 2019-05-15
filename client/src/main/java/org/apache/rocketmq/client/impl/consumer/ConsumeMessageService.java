@@ -21,11 +21,23 @@ import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.common.protocol.body.ConsumeMessageDirectlyResult;
 
+/**
+ * 消费消息服务
+ */
 public interface ConsumeMessageService {
+    /**
+     * 启动
+     */
     void start();
 
+    /**
+     * 关闭
+     */
     void shutdown();
 
+    /**
+     * 修改线程池大小
+     */
     void updateCorePoolSize(int corePoolSize);
 
     void incCorePoolSize();
@@ -34,11 +46,13 @@ public interface ConsumeMessageService {
 
     int getCorePoolSize();
 
+    /**
+     * 立即消费消息
+     */
     ConsumeMessageDirectlyResult consumeMessageDirectly(final MessageExt msg, final String brokerName);
 
-    void submitConsumeRequest(
-        final List<MessageExt> msgs,
-        final ProcessQueue processQueue,
-        final MessageQueue messageQueue,
-        final boolean dispathToConsume);
+    /**
+     * 提交消费请求
+     */
+    void submitConsumeRequest(final List<MessageExt> msgs, final ProcessQueue processQueue, final MessageQueue messageQueue, final boolean dispathToConsume);
 }

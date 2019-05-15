@@ -48,7 +48,7 @@ public class ProcessQueue {
     private final AtomicLong msgSize = new AtomicLong();
     private final Lock lockConsume = new ReentrantLock();
     /**
-     * A subset of msgTreeMap, will only be used when orderly consume
+     * msgTreeMap的一个子集，只在有序使用时使用
      */
     private final TreeMap<Long, MessageExt> consumingMsgOrderlyTreeMap = new TreeMap<Long, MessageExt>();
     private final AtomicLong tryUnlockTimes = new AtomicLong(0);
@@ -70,7 +70,7 @@ public class ProcessQueue {
     }
 
     /**
-     * @param pushConsumer
+     * 清除过期消息
      */
     public void cleanExpiredMsg(DefaultMQPushConsumer pushConsumer) {
         if (pushConsumer.getDefaultMQPushConsumerImpl().isConsumeOrderly()) {

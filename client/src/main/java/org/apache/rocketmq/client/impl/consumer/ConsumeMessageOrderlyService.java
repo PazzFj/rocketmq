@@ -50,8 +50,7 @@ import org.apache.rocketmq.remoting.common.RemotingHelper;
 
 public class ConsumeMessageOrderlyService implements ConsumeMessageService {
     private static final InternalLogger log = ClientLogger.getLog();
-    private final static long MAX_TIME_CONSUME_CONTINUOUSLY =
-        Long.parseLong(System.getProperty("rocketmq.client.maxTimeConsumeContinuously", "60000"));
+    private final static long MAX_TIME_CONSUME_CONTINUOUSLY = Long.parseLong(System.getProperty("rocketmq.client.maxTimeConsumeContinuously", "60000"));
     private final DefaultMQPushConsumerImpl defaultMQPushConsumerImpl;
     private final DefaultMQPushConsumer defaultMQPushConsumer;
     private final MessageListenerOrderly messageListener;
@@ -188,10 +187,7 @@ public class ConsumeMessageOrderlyService implements ConsumeMessageService {
     }
 
     @Override
-    public void submitConsumeRequest(
-        final List<MessageExt> msgs,
-        final ProcessQueue processQueue,
-        final MessageQueue messageQueue,
+    public void submitConsumeRequest(final List<MessageExt> msgs, final ProcessQueue processQueue, final MessageQueue messageQueue,
         final boolean dispathToConsume) {
         if (dispathToConsume) {
             ConsumeRequest consumeRequest = new ConsumeRequest(processQueue, messageQueue);
@@ -228,11 +224,7 @@ public class ConsumeMessageOrderlyService implements ConsumeMessageService {
         return false;
     }
 
-    private void submitConsumeRequestLater(
-        final ProcessQueue processQueue,
-        final MessageQueue messageQueue,
-        final long suspendTimeMillis
-    ) {
+    private void submitConsumeRequestLater(final ProcessQueue processQueue, final MessageQueue messageQueue, final long suspendTimeMillis) {
         long timeMillis = suspendTimeMillis;
         if (timeMillis == -1) {
             timeMillis = this.defaultMQPushConsumer.getSuspendCurrentQueueTimeMillis();
@@ -430,6 +422,7 @@ public class ConsumeMessageOrderlyService implements ConsumeMessageService {
                         }
 
                         long interval = System.currentTimeMillis() - beginTime;
+                        // 如果超过60秒
                         if (interval > MAX_TIME_CONSUME_CONTINUOUSLY) {
                             ConsumeMessageOrderlyService.this.submitConsumeRequestLater(processQueue, messageQueue, 10);
                             break;
