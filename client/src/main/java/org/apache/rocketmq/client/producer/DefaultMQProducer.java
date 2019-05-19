@@ -125,7 +125,7 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
     }
 
     /**
-     * 启动
+     * Producer 启动
      */
     @Override
     public void start() throws MQClientException {

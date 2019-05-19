@@ -82,11 +82,14 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.remoting.netty.NettyClientConfig;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
+/**
+ * 对应一台服务, 或者说broker对应一个MQClientInstance
+ */
 public class MQClientInstance {
     private final static long LOCK_TIMEOUT_MILLIS = 3000;  // 锁超时3000毫秒
     private final InternalLogger log = ClientLogger.getLog();
     private final ClientConfig clientConfig;    // MQProducer 中的配置 copy
-    private final int instanceIndex;        // 默认0 开始
+    private final int instanceIndex;        // 实例(次数)
     private final String clientId;          // 客户端ip @ 客户端名称
     private final long bootTimestamp = System.currentTimeMillis();
 

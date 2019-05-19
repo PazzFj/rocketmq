@@ -51,11 +51,11 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
 
     private final InternalLogger log = ClientLogger.getLog();
 
-    protected final transient DefaultMQPushConsumerImpl defaultMQPushConsumerImpl;
+    protected final transient DefaultMQPushConsumerImpl defaultMQPushConsumerImpl;  //
 
-    private String consumerGroup;
+    private String consumerGroup;           //消费组名称
 
-    private MessageModel messageModel = MessageModel.CLUSTERING;
+    private MessageModel messageModel = MessageModel.CLUSTERING;    //默认集群
 
     private ConsumeFromWhere consumeFromWhere = ConsumeFromWhere.CONSUME_FROM_LAST_OFFSET;
 

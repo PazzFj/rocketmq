@@ -55,6 +55,10 @@ public class ClientConfig {
 
     private LanguageCode language = LanguageCode.JAVA;  // 语言枚举 (Java)
 
+    /**
+     * 得到mq ip@9876
+     * @return
+     */
     public String buildMQClientId() {
         StringBuilder sb = new StringBuilder();
         sb.append(this.getClientIP());
