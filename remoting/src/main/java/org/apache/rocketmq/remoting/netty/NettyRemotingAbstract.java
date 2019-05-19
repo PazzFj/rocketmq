@@ -77,8 +77,8 @@ public abstract class NettyRemotingAbstract {
      * This container holds all processors per request code, aka, for each incoming request, we may look up the
      * responding processor in this map to handle the request.
      */
-    protected final HashMap<Integer/* request code */, Pair<NettyRequestProcessor, ExecutorService>> processorTable =
-        new HashMap<Integer, Pair<NettyRequestProcessor, ExecutorService>>(64);
+    // 请求对应一个 Pair对象(NettyRequestProcessor, ExecutorService)
+    protected final HashMap<Integer/* request code */, Pair<NettyRequestProcessor, ExecutorService>> processorTable = new HashMap<Integer, Pair<NettyRequestProcessor, ExecutorService>>(64);
 
     /**
      * 执行器将netty事件提供给用户定义的{@link ChannelEventListener}

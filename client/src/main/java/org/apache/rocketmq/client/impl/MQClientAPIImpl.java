@@ -201,6 +201,9 @@ public class MQClientAPIImpl {
         return remotingClient;
     }
 
+    /**
+     * 取到当前broker上面的ip地址
+     */
     public String fetchNameServerAddr() {
         try {
             String addrs = this.topAddressing.fetchNSAddr();

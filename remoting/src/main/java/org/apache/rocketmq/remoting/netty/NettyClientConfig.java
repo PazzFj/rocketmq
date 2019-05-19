@@ -18,7 +18,7 @@ package org.apache.rocketmq.remoting.netty;
 
 public class NettyClientConfig {
     /**
-     * Worker thread number
+     * 工作线程数量
      */
     private int clientWorkerThreads = 4;
     private int clientCallbackExecutorThreads = Runtime.getRuntime().availableProcessors();
@@ -28,8 +28,7 @@ public class NettyClientConfig {
     private long channelNotActiveInterval = 1000 * 60;
 
     /**
-     * IdleStateEvent will be triggered when neither read nor write was performed for
-     * the specified period of this time. Specify {@code 0} to disable
+     * 当在指定时间段内既不执行读操作也不执行写操作时，将触发IdleStateEvent。指定{@code 0}禁用
      */
     private int clientChannelMaxIdleTimeSeconds = 120;
 
@@ -38,7 +37,7 @@ public class NettyClientConfig {
     private boolean clientPooledByteBufAllocatorEnable = false;
     private boolean clientCloseSocketIfTimeout = false;
 
-    private boolean useTLS;
+    private boolean useTLS; // 使用 TLS (安全传输层协议)
 
     public boolean isClientCloseSocketIfTimeout() {
         return clientCloseSocketIfTimeout;

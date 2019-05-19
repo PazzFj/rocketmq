@@ -96,7 +96,7 @@ public class MQClientInstance {
     private final ConcurrentMap<String/* group */, MQAdminExtInner> adminExtTable = new ConcurrentHashMap<String, MQAdminExtInner>();
     // 通信客户端配置
     private final NettyClientConfig nettyClientConfig;
-    // 组装请求，代理通信客户端的通信接口
+    /** 组装请求，代理通信客户端的通信接口 */
     private final MQClientAPIImpl mQClientAPIImpl;  // 通过NettyClientConfig 创建RemotingClient
     // topic, 队列, 消息管理接口
     private final MQAdminImpl mQAdminImpl;
@@ -137,7 +137,7 @@ public class MQClientInstance {
     public MQClientInstance(ClientConfig clientConfig, int instanceIndex, String clientId, RPCHook rpcHook) {
         this.clientConfig = clientConfig;
         this.instanceIndex = instanceIndex;
-        // 通信客户端配置
+        // mq通信客户端 Netty配置 (这里采取Netty 创建配置NettClientConfig 对象)
         this.nettyClientConfig = new NettyClientConfig();
         this.nettyClientConfig.setClientCallbackExecutorThreads(clientConfig.getClientCallbackExecutorThreads());
         this.nettyClientConfig.setUseTLS(clientConfig.isUseTLS());

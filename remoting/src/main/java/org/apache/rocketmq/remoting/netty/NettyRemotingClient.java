@@ -70,6 +70,19 @@ import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
 /**
  * netty (远程)客户端
+ *
+ * 执行发送请求, 还有单向发送
+ * RemotingCommand invokeSync(final String addr, final RemotingCommand request, final long timeoutMillis)
+ *
+ * 注册处理器, 请求码对应请求处理器
+ * void registerProcessor(final int requestCode, final NettyRequestProcessor processor, final ExecutorService executor);
+ *
+ * 获取执行线程
+ * ExecutorService getCallbackExecutor();
+ *
+ * 修改服务端ip地址
+ * void updateNameServerAddressList(final List<String> addrs);
+ *
  */
 public class NettyRemotingClient extends NettyRemotingAbstract implements RemotingClient {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);

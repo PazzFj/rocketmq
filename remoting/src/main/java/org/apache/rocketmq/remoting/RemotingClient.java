@@ -40,7 +40,7 @@ public interface RemotingClient extends RemotingService {
     RemotingCommand invokeSync(final String addr, final RemotingCommand request, final long timeoutMillis)
             throws InterruptedException, RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException;
 
-    // 执行 异步
+    // 执行 异步(通过ip地址, 请求对象, 超时事件, 执行回调对象InvokeCallback)
     void invokeAsync(final String addr, final RemotingCommand request, final long timeoutMillis, final InvokeCallback invokeCallback)
             throws InterruptedException, RemotingConnectException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException;
 
