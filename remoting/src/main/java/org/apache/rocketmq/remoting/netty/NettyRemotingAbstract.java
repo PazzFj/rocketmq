@@ -379,11 +379,11 @@ public abstract class NettyRemotingAbstract {
     }
 
     /**
-     * 执行同步
+     * 执行同步()
      */
     public RemotingCommand invokeSyncImpl(final Channel channel, final RemotingCommand request, final long timeoutMillis)
         throws InterruptedException, RemotingSendRequestException, RemotingTimeoutException {
-        final int opaque = request.getOpaque();
+        final int opaque = request.getOpaque(); //请求id
 
         try {
             // ResponseFuture 为回调对象 同步与异步使用

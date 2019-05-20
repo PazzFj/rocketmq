@@ -93,15 +93,15 @@ public class MQClientInstance {
     private final String clientId;          // 客户端ip @ 客户端名称
     private final long bootTimestamp = System.currentTimeMillis();
 
-    //生产者，消费者，管理者的纪录信息
+    //生产者，消费者，管理者的纪录信息  (DefaultMQProducerImpl  ----  DefaultMQ????ConsumerImpl)
     private final ConcurrentMap<String/* group */, MQProducerInner> producerTable = new ConcurrentHashMap<String, MQProducerInner>();
     private final ConcurrentMap<String/* group */, MQConsumerInner> consumerTable = new ConcurrentHashMap<String, MQConsumerInner>();
     private final ConcurrentMap<String/* group */, MQAdminExtInner> adminExtTable = new ConcurrentHashMap<String, MQAdminExtInner>();
-    // 通信客户端配置
+    // Netty通信客户端配置类
     private final NettyClientConfig nettyClientConfig;
-    /** 组装请求，代理通信客户端的通信接口 */
+    /** 组装请求, 代理通信客户端的通信接口 */
     private final MQClientAPIImpl mQClientAPIImpl;  // 通过NettyClientConfig 创建RemotingClient
-    // topic, 队列, 消息管理接口
+    /** 创建topic, 获取队列, 消息管理接口 */
     private final MQAdminImpl mQAdminImpl;
     // Topic 路线数据
     private final ConcurrentMap<String, TopicRouteData> topicRouteTable = new ConcurrentHashMap<String, TopicRouteData>();
@@ -536,6 +536,7 @@ public class MQClientInstance {
         }
     }
 
+    //修改主题路线信息
     public boolean updateTopicRouteInfoFromNameServer(final String topic) {
         return updateTopicRouteInfoFromNameServer(topic, false, null);
     }
@@ -642,8 +643,7 @@ public class MQClientInstance {
                 try {
                     TopicRouteData topicRouteData;
                     if (isDefault && defaultMQProducer != null) {
-                        topicRouteData = this.mQClientAPIImpl.getDefaultTopicRouteInfoFromNameServer(defaultMQProducer.getCreateTopicKey(),
-                            1000 * 3);
+                        topicRouteData = this.mQClientAPIImpl.getDefaultTopicRouteInfoFromNameServer(defaultMQProducer.getCreateTopicKey(), 1000 * 3);
                         if (topicRouteData != null) {
                             for (QueueData data : topicRouteData.getQueueDatas()) {
                                 int queueNums = Math.min(defaultMQProducer.getDefaultTopicQueueNums(), data.getReadQueueNums());

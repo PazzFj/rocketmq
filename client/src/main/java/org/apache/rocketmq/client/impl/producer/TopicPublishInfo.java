@@ -37,6 +37,7 @@ public class TopicPublishInfo {
 
     private TopicRouteData topicRouteData;  // 主题路线数据
 
+
     public boolean isOrderTopic() {
         return orderTopic;
     }
@@ -73,6 +74,9 @@ public class TopicPublishInfo {
         this.haveTopicRouterInfo = haveTopicRouterInfo;
     }
 
+    /**
+     * 查询一个消息队列
+     */
     public MessageQueue selectOneMessageQueue(final String lastBrokerName) {
         if (lastBrokerName == null) {
             return selectOneMessageQueue();

@@ -55,12 +55,14 @@ import org.apache.rocketmq.remoting.netty.ResponseFuture;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
 /**
- * 创建 Topic
+ * 创建Topic,  查询消息
  */
 public class MQAdminImpl {
 
     private final InternalLogger log = ClientLogger.getLog();
+
     private final MQClientInstance mQClientFactory;
+
     private long timeoutMillis = 6000;
 
     public MQAdminImpl(MQClientInstance mQClientFactory) {

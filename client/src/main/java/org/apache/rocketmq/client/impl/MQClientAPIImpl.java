@@ -245,8 +245,7 @@ public class MQClientAPIImpl {
         byte[] body = RemotingSerializable.encode(config);
         request.setBody(body);
 
-        RemotingCommand response = this.remotingClient.invokeSync(MixAll.brokerVIPChannel(this.clientConfig.isVipChannelEnabled(), addr),
-                request, timeoutMillis);
+        RemotingCommand response = this.remotingClient.invokeSync(MixAll.brokerVIPChannel(this.clientConfig.isVipChannelEnabled(), addr), request, timeoutMillis);
         assert response != null;
         switch (response.getCode()) {
             case ResponseCode.SUCCESS: {
@@ -262,11 +261,6 @@ public class MQClientAPIImpl {
 
     /**
      * 创建Topic
-     *
-     * @param addr
-     * @param defaultTopic
-     * @param topicConfig
-     * @param timeoutMillis
      */
     public void createTopic(final String addr, final String defaultTopic, final TopicConfig topicConfig, final long timeoutMillis)
             throws RemotingException, MQBrokerException, InterruptedException, MQClientException {
@@ -1206,6 +1200,9 @@ public class MQClientAPIImpl {
         throw new MQBrokerException(response.getCode(), response.getRemark());
     }
 
+    /**
+     * 获取默认TopicRouteData
+     */
     public TopicRouteData getDefaultTopicRouteInfoFromNameServer(final String topic, final long timeoutMillis)
             throws RemotingException, MQClientException, InterruptedException {
 
@@ -1221,6 +1218,8 @@ public class MQClientAPIImpl {
 
     /**
      * 根据topic 获取TopicRouteData
+     *  1、创建 CommandCustomHeader => GetRouteInfoRequestHeader 定制请求头
+     *  2、通过 CommandCustomHeader 和 topic 创建RemotingCommand 远程命令对象
      */
     public TopicRouteData getTopicRouteInfoFromNameServer(final String topic, final long timeoutMillis, boolean allowTopicNotExist) throws MQClientException,
             InterruptedException, RemotingTimeoutException, RemotingSendRequestException, RemotingConnectException {
@@ -1228,9 +1227,10 @@ public class MQClientAPIImpl {
         GetRouteInfoRequestHeader requestHeader = new GetRouteInfoRequestHeader();
         requestHeader.setTopic(topic);
 
-        RemotingCommand request = RemotingCommand.createRequestCommand(RequestCode.GET_ROUTEINTO_BY_TOPIC, requestHeader);
+        RemotingCommand request = RemotingCommand.createRequestCommand(RequestCode.GET_ROUTEINTO_BY_TOPIC, requestHeader);  // 通过CommandCustomHeader, 创建RemotingCommand 对象
 
-        RemotingCommand response = this.remotingClient.invokeSync(null, request, timeoutMillis);
+        //发送连接请求
+        RemotingCommand response = this.remotingClient.invokeSync(null, request, timeoutMillis);//发送连接请求
         assert response != null;
         switch (response.getCode()) {
             case ResponseCode.TOPIC_NOT_EXIST: {

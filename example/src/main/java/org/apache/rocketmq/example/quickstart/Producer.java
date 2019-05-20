@@ -29,29 +29,29 @@ public class Producer {
     public static void main(String[] args) throws Exception {
 
         DefaultMQProducer producer = new DefaultMQProducer("example_group_name");
-        producer.setNamesrvAddr("192.168.175.130:9876");
+        producer.setNamesrvAddr("47.101.167.134:9876");
         producer.setVipChannelEnabled(false);
         producer.start();
         producer.setRetryTimesWhenSendAsyncFailed(0); //失败重试时间
         for (int i = 0; i < 10; i++) {
             final int index = i;
             Message msgA = new Message("TopicTestA", "TagA", ("A Hello world " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
-            Message msgB = new Message("TopicTestB", "TagB", ("B Hello world " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
-            Message msgC = new Message("TopicTestC", "TagC", ("C Hello world " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
+//            Message msgB = new Message("TopicTestB", "TagB", ("B Hello world " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
+//            Message msgC = new Message("TopicTestC", "TagC", ("C Hello world " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
             SendResult sendResult = producer.send(msgA);
             System.out.println("sync: " + sendResult.getMsgId());
-            producer.send(msgB, new SendCallback() {
-                @Override
-                public void onSuccess(SendResult sendResult) {
-                    System.out.println("async: " + sendResult.getMsgId());
-                }
-                @Override
-                public void onException(Throwable e) {
-                    System.out.println("no");
-                    e.printStackTrace();
-                }
-            });
-            producer.sendOneway(msgC);
+//            producer.send(msgB, new SendCallback() {
+//                @Override
+//                public void onSuccess(SendResult sendResult) {
+//                    System.out.println("async: " + sendResult.getMsgId());
+//                }
+//                @Override
+//                public void onException(Throwable e) {
+//                    System.out.println("no");
+//                    e.printStackTrace();
+//                }
+//            });
+//            producer.sendOneway(msgC);
         }
         producer.shutdown();
     }
