@@ -538,7 +538,7 @@ public class MQClientInstance {
 
     //修改主题路线信息
     public boolean updateTopicRouteInfoFromNameServer(final String topic) {
-        return updateTopicRouteInfoFromNameServer(topic, false, null);
+        return updateTopicRouteInfoFromNameServer(topic, false, null);      //false, null
     }
 
     private boolean isBrokerAddrExistInTopicRouteTable(final String addr) {
@@ -652,7 +652,7 @@ public class MQClientInstance {
                             }
                         }
                     } else {
-                        topicRouteData = this.mQClientAPIImpl.getTopicRouteInfoFromNameServer(topic, 1000 * 3);
+                        topicRouteData = this.mQClientAPIImpl.getTopicRouteInfoFromNameServer(topic, 1000 * 3);     //  获取 TopicRouteData
                     }
                     if (topicRouteData != null) {
                         TopicRouteData old = this.topicRouteTable.get(topic);

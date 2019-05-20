@@ -1213,7 +1213,7 @@ public class MQClientAPIImpl {
      * 根据topic 获取TopicRouteData
      */
     public TopicRouteData getTopicRouteInfoFromNameServer(final String topic, final long timeoutMillis) throws RemotingException, MQClientException, InterruptedException {
-        return getTopicRouteInfoFromNameServer(topic, timeoutMillis, true);
+        return getTopicRouteInfoFromNameServer(topic, timeoutMillis, true);         //允许topic不存在
     }
 
     /**

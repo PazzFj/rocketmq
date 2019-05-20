@@ -54,7 +54,7 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
 
     private String producerGroup;                   // 生产者组名称
 
-    private String createTopicKey = MixAll.AUTO_CREATE_TOPIC_KEY_TOPIC;  // 主题key (TBW102)
+    private String createTopicKey = MixAll.AUTO_CREATE_TOPIC_KEY_TOPIC;  // key (TBW102)
 
     private volatile int defaultTopicQueueNums = 4;     // 默认主题队列数量 (4)
 
