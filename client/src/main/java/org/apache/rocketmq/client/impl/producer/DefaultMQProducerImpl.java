@@ -520,6 +520,9 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         this.mqFaultStrategy.updateFaultItem(brokerName, currentLatency, isolation);
     }
 
+    /**
+     * 发送统一使用该方法
+     */
     private SendResult sendDefaultImpl(Message msg, final CommunicationMode communicationMode, final SendCallback sendCallback, final long timeout)
             throws MQClientException, RemotingException, MQBrokerException, InterruptedException {
         this.makeSureStateOK();     //mq是否正在运行, 否则抛出异常
@@ -693,6 +696,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                                       final TopicPublishInfo topicPublishInfo,
                                       final long timeout) throws MQClientException, RemotingException, MQBrokerException, InterruptedException {
         long beginStartTime = System.currentTimeMillis();
+        // 127.0.0.1:10911
         String brokerAddr = this.mQClientFactory.findBrokerAddressInPublish(mq.getBrokerName());
         if (null == brokerAddr) {
             tryToFindTopicPublishInfo(mq.getTopic());
@@ -706,14 +710,15 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
             byte[] prevBody = msg.getBody();
             try {
-                //for MessageBatch,ID has been set in the generating process
+                //对于MessageBatch, 在生成过程中已经设置了ID
                 if (!(msg instanceof MessageBatch)) {
+                    // message 创建UNIQ_KEY 生成ID
                     MessageClientIDSetter.setUniqID(msg);
                 }
 
                 int sysFlag = 0;
                 boolean msgBodyCompressed = false;
-                if (this.tryToCompressMessage(msg)) {       // false
+                if (this.tryToCompressMessage(msg)) {       // false 如果message 中 body 长度超过 1024 * 4 则为true
                     sysFlag |= MessageSysFlag.COMPRESSED_FLAG;
                     msgBodyCompressed = true;
                 }
@@ -788,9 +793,9 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                     case ASYNC:
                         Message tmpMessage = msg;
                         if (msgBodyCompressed) {
-                            //If msg body was compressed, msgbody should be reset using prevBody.
-                            //Clone new message using commpressed message body and recover origin massage.
-                            //Fix bug:https://github.com/apache/rocketmq-externals/issues/66
+                            // 如果压缩了msg体，则应使用prevBody重置msgbody
+                            // 克隆新消息使用压缩的消息体和恢复原始按摩
+                            // 修复bug: https://github.com/apache/rocketmq-externals/issues/66
                             tmpMessage = MessageAccessor.cloneMessage(msg);
                             msg.setBody(prevBody);
                         }
@@ -798,19 +803,10 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                         if (timeout < costTimeAsync) {
                             throw new RemotingTooMuchRequestException("sendKernelImpl call timeout");
                         }
-                        sendResult = this.mQClientFactory.getMQClientAPIImpl().sendMessage(     //核心, 发送
-                                brokerAddr,
-                                mq.getBrokerName(),
-                                tmpMessage,
-                                requestHeader,
-                                timeout - costTimeAsync,
-                                communicationMode,
-                                sendCallback,
-                                topicPublishInfo,
-                                this.mQClientFactory,
-                                this.defaultMQProducer.getRetryTimesWhenSendAsyncFailed(),
-                                context,
-                                this);
+                        //核心, 发送
+                        sendResult = this.mQClientFactory.getMQClientAPIImpl().sendMessage(brokerAddr, mq.getBrokerName(),  //核心, 异步发送
+                                tmpMessage, requestHeader, timeout - costTimeAsync, communicationMode, sendCallback, topicPublishInfo,
+                                this.mQClientFactory, this.defaultMQProducer.getRetryTimesWhenSendAsyncFailed(), context, this);
                         break;
                     case ONEWAY:
                     case SYNC:
@@ -818,15 +814,8 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                         if (timeout < costTimeSync) {
                             throw new RemotingTooMuchRequestException("sendKernelImpl call timeout");
                         }
-                        sendResult = this.mQClientFactory.getMQClientAPIImpl().sendMessage(
-                                brokerAddr,
-                                mq.getBrokerName(),
-                                msg,
-                                requestHeader,
-                                timeout - costTimeSync,
-                                communicationMode,
-                                context,
-                                this);
+                        sendResult = this.mQClientFactory.getMQClientAPIImpl().sendMessage(brokerAddr, mq.getBrokerName(),
+                                msg, requestHeader, timeout - costTimeSync, communicationMode, context, this);
                         break;
                     default:
                         assert false;
@@ -1289,6 +1278,9 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         this.asyncSenderExecutor = asyncSenderExecutor;
     }
 
+    /**
+     * 同步发送
+     */
     public SendResult send(Message msg, long timeout) throws MQClientException, RemotingException, MQBrokerException, InterruptedException {
         return this.sendDefaultImpl(msg, CommunicationMode.SYNC, null, timeout);
     }

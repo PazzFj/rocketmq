@@ -109,7 +109,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
     private boolean consumeOrderly = false;         //消费顺序
     private MessageListener messageListenerInner;   //消息监听器
     private OffsetStore offsetStore;
-    private ConsumeMessageService consumeMessageService;    //消费消息服务
+    private ConsumeMessageService consumeMessageService;    //消费消息服务 使用该线程消费消息
     private long queueFlowControlTimes = 0;
     private long queueMaxSpanFlowControlTimes = 0;
 

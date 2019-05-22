@@ -92,6 +92,7 @@ public class MQFaultStrategy {
         return tpInfo.selectOneMessageQueue(lastBrokerName);
     }
 
+    //修改故障详情
     public void updateFaultItem(final String brokerName, final long currentLatency, boolean isolation) {
         if (this.sendLatencyFaultEnable) {
             long duration = computeNotAvailableDuration(isolation ? 30000 : currentLatency);

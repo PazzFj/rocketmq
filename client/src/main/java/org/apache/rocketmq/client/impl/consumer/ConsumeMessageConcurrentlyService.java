@@ -249,8 +249,7 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
     }
 
     private void cleanExpireMsg() {
-        Iterator<Map.Entry<MessageQueue, ProcessQueue>> it =
-            this.defaultMQPushConsumerImpl.getRebalanceImpl().getProcessQueueTable().entrySet().iterator();
+        Iterator<Map.Entry<MessageQueue, ProcessQueue>> it = this.defaultMQPushConsumerImpl.getRebalanceImpl().getProcessQueueTable().entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<MessageQueue, ProcessQueue> next = it.next();
             ProcessQueue pq = next.getValue();
