@@ -387,7 +387,7 @@ public abstract class NettyRemotingAbstract {
 
         try {
             // ResponseFuture 为回调对象 同步与异步使用
-            final ResponseFuture responseFuture = new ResponseFuture(channel, opaque, timeoutMillis, null, null);
+            final ResponseFuture responseFuture = new ResponseFuture(channel, opaque, timeoutMillis, null, null);  //执行
             // 缓存 (requestId -> ResponseFuture)
             this.responseTable.put(opaque, responseFuture);
             final SocketAddress addr = channel.remoteAddress();
@@ -396,7 +396,7 @@ public abstract class NettyRemotingAbstract {
                 public void operationComplete(ChannelFuture f) throws Exception {
                     if (f.isSuccess()) {
                         responseFuture.setSendRequestOK(true);
-                        return;
+                        return;     //请求成功直接执行下面部分
                     } else {
                         responseFuture.setSendRequestOK(false);
                     }

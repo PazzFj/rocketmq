@@ -107,7 +107,7 @@ public class MQClientInstance {
     private final ConcurrentMap<String, TopicRouteData> topicRouteTable = new ConcurrentHashMap<String, TopicRouteData>();
     private final Lock lockNamesrv = new ReentrantLock();
     private final Lock lockHeartbeat = new ReentrantLock();
-    //broker主从节点地址表
+    //brokerName 主从节点地址表
     private final ConcurrentMap<String/* Broker Name */, HashMap<Long/* brokerId */, String/* address */>> brokerAddrTable = new ConcurrentHashMap<String, HashMap<Long, String>>();
     //broker版本表
     private final ConcurrentMap<String/* Broker Name */, HashMap<String/* address */, Integer>> brokerVersionTable = new ConcurrentHashMap<String, HashMap<String, Integer>>();
@@ -182,20 +182,20 @@ public class MQClientInstance {
 
     /**
      * 创建TopicPublishInfo (MessageQueue 集合,  TopicRouteData 路线数据(ip, QueueData 集合   BrokerData 集合) )
-     * 通过 TopicRouteData 创建 TopicPublishInfo
-     *
+     * 1、通过 TopicRouteData 创建 TopicPublishInfo
+     * 2、通过 TopicRouteData中的 QueueData 创建消息队列 并赋值给TopicPublishInfo中
      */
     public static TopicPublishInfo topicRouteData2TopicPublishInfo(final String topic, final TopicRouteData route) {
         TopicPublishInfo info = new TopicPublishInfo();
         info.setTopicRouteData(route);
         if (route.getOrderTopicConf() != null && route.getOrderTopicConf().length() > 0) {
-            String[] brokers = route.getOrderTopicConf().split(";");
+            String[] brokers = route.getOrderTopicConf().split(";");        //rocketmq-nameserver1:9876;rocketmq-nameserver2:9876
             for (String broker : brokers) {
                 String[] item = broker.split(":");
-                int nums = Integer.parseInt(item[1]);
+                int nums = Integer.parseInt(item[1]);   //端口
                 for (int i = 0; i < nums; i++) {
                     // 创建消息队列(topic, ip, requestId)
-                    MessageQueue mq = new MessageQueue(topic, item[0], i);
+                    MessageQueue mq = new MessageQueue(topic, item[0], i);      //创建消息队列
                     info.getMessageQueueList().add(mq);
                 }
             }
@@ -236,6 +236,11 @@ public class MQClientInstance {
         return info;
     }
 
+    /**
+     *  创建消息队列 (MessageQueue 集合,  TopicRouteData 路线数据(ip, QueueData 集合   BrokerData 集合) )
+     *  1、通过 TopicRouteData 中的 QueueData 创建 MessageQueue
+     *  2、Set 储存并返回
+     */
     public static Set<MessageQueue> topicRouteData2TopicSubscribeInfo(final String topic, final TopicRouteData route) {
         Set<MessageQueue> mqList = new HashSet<MessageQueue>();
         List<QueueData> qds = route.getQueueDatas();
@@ -637,13 +642,22 @@ public class MQClientInstance {
         }
     }
 
+    /**
+     * 修改topic route info
+     * 1、通过 topic 去请求获取到 TopicRouteData
+     * 2、通过 RouteData 创建 PublishInfo  (其中通过 QueueData 创建了 MessageQueue )
+     * 3、将已创建好的 PublishInfo 同步到所有的Producer
+     * 4、将RouteData中的QueueData 创建 MessageQueue 并同步到 consumer
+     * 5、储存RouteData
+     */
     public boolean updateTopicRouteInfoFromNameServer(final String topic, boolean isDefault, DefaultMQProducer defaultMQProducer) {
         try {
             if (this.lockNamesrv.tryLock(LOCK_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)) {
                 try {
                     TopicRouteData topicRouteData;
                     if (isDefault && defaultMQProducer != null) {
-                        topicRouteData = this.mQClientAPIImpl.getDefaultTopicRouteInfoFromNameServer(defaultMQProducer.getCreateTopicKey(), 1000 * 3);
+                        // 获取默认TopicRouteData
+                        topicRouteData = this.mQClientAPIImpl.getDefaultTopicRouteInfoFromNameServer(defaultMQProducer.getCreateTopicKey(), 1000 * 3);  //  获取 TopicRouteData
                         if (topicRouteData != null) {
                             for (QueueData data : topicRouteData.getQueueDatas()) {
                                 int queueNums = Math.min(defaultMQProducer.getDefaultTopicQueueNums(), data.getReadQueueNums());
@@ -672,20 +686,24 @@ public class MQClientInstance {
 
                             // Update Pub info
                             {
+                                // 通过 TopicRouteData 创建 TopicPublishInfo
+                                // 并将 TopicPublishInfo 同步到到所有的 DefaultMQProducerImpl
                                 TopicPublishInfo publishInfo = topicRouteData2TopicPublishInfo(topic, topicRouteData);
                                 publishInfo.setHaveTopicRouterInfo(true);
                                 Iterator<Entry<String, MQProducerInner>> it = this.producerTable.entrySet().iterator();
                                 while (it.hasNext()) {
                                     Entry<String, MQProducerInner> entry = it.next();
-                                    MQProducerInner impl = entry.getValue();
+                                    MQProducerInner impl = entry.getValue();    // 获取所有的Producer => DefaultMQProducerImpl
                                     if (impl != null) {
-                                        impl.updateTopicPublishInfo(topic, publishInfo);
+                                        impl.updateTopicPublishInfo(topic, publishInfo);    // 把当前发布的信息 同步到所有的Producer
                                     }
                                 }
                             }
 
                             // Update sub info
                             {
+                                // 通过TopicRouteData 中 QueueData 创建 MessageQueue
+                                // 并将 MessageQueue 通知到所有的 DefaultMQPushConsumerImpl 消费者
                                 Set<MessageQueue> subscribeInfo = topicRouteData2TopicSubscribeInfo(topic, topicRouteData);
                                 Iterator<Entry<String, MQConsumerInner>> it = this.consumerTable.entrySet().iterator();
                                 while (it.hasNext()) {
@@ -697,7 +715,7 @@ public class MQClientInstance {
                                 }
                             }
                             log.info("topicRouteTable.put. Topic = {}, TopicRouteData[{}]", topic, cloneTopicRouteData);
-                            this.topicRouteTable.put(topic, cloneTopicRouteData);
+                            this.topicRouteTable.put(topic, cloneTopicRouteData);   // 储存消息路线数据
                             return true;
                         }
                     } else {

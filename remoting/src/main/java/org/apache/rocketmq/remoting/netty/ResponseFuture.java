@@ -28,22 +28,21 @@ import org.apache.rocketmq.remoting.protocol.RemotingCommand;
  * 响应
  */
 public class ResponseFuture {
-    private final int opaque; //请求id
-    private final Channel processChannel;   //通道
-    private final long timeoutMillis;   //时间
-    private final InvokeCallback invokeCallback; //回调
+    private final int opaque; //请求id*
+    private final Channel processChannel;   //通道*
+    private final long timeoutMillis;   //时间*
+    private final InvokeCallback invokeCallback; //回调*
     private final long beginTimestamp = System.currentTimeMillis(); //创建时间
-    private final CountDownLatch countDownLatch = new CountDownLatch(1);  //计算器
+    private final CountDownLatch countDownLatch = new CountDownLatch(1);  //计算器 %
 
-    private final SemaphoreReleaseOnlyOnce once;
+    private final SemaphoreReleaseOnlyOnce once;//信号发射只一次*
 
     private final AtomicBoolean executeCallbackOnlyOnce = new AtomicBoolean(false);
-    private volatile RemotingCommand responseCommand;
-    private volatile boolean sendRequestOK = true;      // 发送请求成功
-    private volatile Throwable cause;                   // 异常
+    private volatile RemotingCommand responseCommand;   //  请求数据对象%
+    private volatile boolean sendRequestOK = true;      // 发送请求成功还是失败   %
+    private volatile Throwable cause;                   // 异常   %
 
-    public ResponseFuture(Channel channel, int opaque, long timeoutMillis, InvokeCallback invokeCallback,
-        SemaphoreReleaseOnlyOnce once) {
+    public ResponseFuture(Channel channel, int opaque, long timeoutMillis, InvokeCallback invokeCallback, SemaphoreReleaseOnlyOnce once) {
         this.opaque = opaque;
         this.processChannel = channel;
         this.timeoutMillis = timeoutMillis;

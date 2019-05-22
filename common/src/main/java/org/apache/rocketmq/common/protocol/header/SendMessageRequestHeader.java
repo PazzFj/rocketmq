@@ -52,7 +52,7 @@ public class SendMessageRequestHeader implements CommandCustomHeader {
     @CFNullable
     private boolean unitMode = false;   //单元模式
     @CFNullable
-    private boolean batch = false;      //是否批次
+    private boolean batch = false;      //是否批次  MessageBatch
     private Integer maxReconsumeTimes;  //最大重新消息时间
 
     @Override

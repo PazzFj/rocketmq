@@ -165,7 +165,7 @@ public class MQClientAPIImpl {
         System.setProperty(RemotingCommand.REMOTING_VERSION_KEY, Integer.toString(MQVersion.CURRENT_VERSION));
     }
 
-    //netty远程处理
+    //Netty远程客户端
     private final RemotingClient remotingClient;
     private final TopAddressing topAddressing;
     //请求码处理函数
@@ -304,20 +304,12 @@ public class MQClientAPIImpl {
         return sendMessage(addr, brokerName, msg, requestHeader, timeoutMillis, communicationMode, null, null, null, 0, context, producer);
     }
 
-    public SendResult sendMessage(
-            final String addr,
-            final String brokerName,
-            final Message msg,
-            final SendMessageRequestHeader requestHeader,
-            final long timeoutMillis,
-            final CommunicationMode communicationMode,
-            final SendCallback sendCallback,
-            final TopicPublishInfo topicPublishInfo,
-            final MQClientInstance instance,
-            final int retryTimesWhenSendFailed,
-            final SendMessageContext context,
-            final DefaultMQProducerImpl producer
-    ) throws RemotingException, MQBrokerException, InterruptedException {
+    /**
+     * 发送消息 (ip, broker名称, 消息, 发送请求头CommandCustomHeader, 超时时间, 发送模式, 回调, 发布信息, MQClientInstance, 重试时间, 发送消息上下文, producer)
+     */
+    public SendResult sendMessage(final String addr, final String brokerName, final Message msg, final SendMessageRequestHeader requestHeader, final long timeoutMillis,
+            final CommunicationMode communicationMode, final SendCallback sendCallback, final TopicPublishInfo topicPublishInfo, final MQClientInstance instance,
+            final int retryTimesWhenSendFailed, final SendMessageContext context, final DefaultMQProducerImpl producer) throws RemotingException, MQBrokerException, InterruptedException {
         long beginStartTime = System.currentTimeMillis();
         RemotingCommand request = null;
         if (sendSmartMsg || msg instanceof MessageBatch) {
@@ -339,8 +331,7 @@ public class MQClientAPIImpl {
                 if (timeoutMillis < costTimeAsync) {
                     throw new RemotingTooMuchRequestException("sendMessage call timeout");
                 }
-                this.sendMessageAsync(addr, brokerName, msg, timeoutMillis - costTimeAsync, request, sendCallback, topicPublishInfo, instance,
-                        retryTimesWhenSendFailed, times, context, producer);
+                this.sendMessageAsync(addr, brokerName, msg, timeoutMillis - costTimeAsync, request, sendCallback, topicPublishInfo, instance, retryTimesWhenSendFailed, times, context, producer); //
                 return null;
             case SYNC:
                 long costTimeSync = System.currentTimeMillis() - beginStartTime;
@@ -356,6 +347,9 @@ public class MQClientAPIImpl {
         return null;
     }
 
+    /**
+     * 发送同步消息
+     */
     private SendResult sendMessageSync(
             final String addr,
             final String brokerName,
@@ -368,6 +362,9 @@ public class MQClientAPIImpl {
         return this.processSendResponse(brokerName, msg, response);
     }
 
+    /**
+     * 发送异步消息
+     */
     private void sendMessageAsync(
             final String addr,
             final String brokerName,
@@ -499,11 +496,10 @@ public class MQClientAPIImpl {
         }
     }
 
-    private SendResult processSendResponse(
-            final String brokerName,
-            final Message msg,
-            final RemotingCommand response
-    ) throws MQBrokerException, RemotingCommandException {
+    /**
+     * 处理发送响应
+     */
+    private SendResult processSendResponse(final String brokerName, final Message msg, final RemotingCommand response) throws MQBrokerException, RemotingCommandException {
         switch (response.getCode()) {
             case ResponseCode.FLUSH_DISK_TIMEOUT:
             case ResponseCode.FLUSH_SLAVE_TIMEOUT:
@@ -529,8 +525,7 @@ public class MQClientAPIImpl {
                         break;
                 }
 
-                SendMessageResponseHeader responseHeader =
-                        (SendMessageResponseHeader) response.decodeCommandCustomHeader(SendMessageResponseHeader.class);
+                SendMessageResponseHeader responseHeader = (SendMessageResponseHeader) response.decodeCommandCustomHeader(SendMessageResponseHeader.class);
 
                 MessageQueue messageQueue = new MessageQueue(msg.getTopic(), brokerName, responseHeader.getQueueId());
 
@@ -542,9 +537,7 @@ public class MQClientAPIImpl {
                     }
                     uniqMsgId = sb.toString();
                 }
-                SendResult sendResult = new SendResult(sendStatus,
-                        uniqMsgId,
-                        responseHeader.getMsgId(), messageQueue, responseHeader.getQueueOffset());
+                SendResult sendResult = new SendResult(sendStatus, uniqMsgId, responseHeader.getMsgId(), messageQueue, responseHeader.getQueueOffset());
                 sendResult.setTransactionId(responseHeader.getTransactionId());
                 String regionId = response.getExtFields().get(MessageConst.PROPERTY_MSG_REGION);
                 String traceOn = response.getExtFields().get(MessageConst.PROPERTY_TRACE_SWITCH);
@@ -1230,7 +1223,7 @@ public class MQClientAPIImpl {
         RemotingCommand request = RemotingCommand.createRequestCommand(RequestCode.GET_ROUTEINTO_BY_TOPIC, requestHeader);  // 通过CommandCustomHeader, 创建RemotingCommand 对象
 
         //发送连接请求
-        RemotingCommand response = this.remotingClient.invokeSync(null, request, timeoutMillis);//发送连接请求
+        RemotingCommand response = this.remotingClient.invokeSync(null, request, timeoutMillis);    //通过NettyRemotingClient 发送
         assert response != null;
         switch (response.getCode()) {
             case ResponseCode.TOPIC_NOT_EXIST: {

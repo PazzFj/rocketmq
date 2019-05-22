@@ -28,7 +28,7 @@ import org.apache.rocketmq.common.protocol.route.TopicRouteData;
  */
 public class TopicPublishInfo {
     private boolean orderTopic = false;     // 根据 TopicRouteData 中的 orderTopicConf 来设置顺序
-    private boolean haveTopicRouterInfo = false;
+    private boolean haveTopicRouterInfo = false;        // 如果TopicRouteData 有值 就改为true
 
     private List<MessageQueue> messageQueueList = new ArrayList<MessageQueue>();    // 消息队列集合
 
@@ -95,6 +95,10 @@ public class TopicPublishInfo {
         }
     }
 
+    /**
+     * PublishInfo 中的 一个值 取模 队列长度
+     * @return
+     */
     public MessageQueue selectOneMessageQueue() {
         int index = this.sendWhichQueue.getAndIncrement();
         int pos = Math.abs(index) % this.messageQueueList.size();
