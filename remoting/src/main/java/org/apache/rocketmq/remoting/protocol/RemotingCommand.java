@@ -75,7 +75,7 @@ public class RemotingCommand {
     private int code;
     private LanguageCode language = LanguageCode.JAVA;
     private int version = 0;
-    private int opaque = requestId.getAndIncrement();   //请求id
+    private int opaque = requestId.getAndIncrement();           //请求id
     private int flag = 0;
     private String remark;  //备注
     private HashMap<String, String> extFields;

@@ -21,6 +21,8 @@ import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.common.RemotingHelper;
 
+import java.util.Random;
+
 /**
  * This class demonstrates how to send messages to brokers using provided {@link DefaultMQProducer}.
  */
@@ -28,13 +30,15 @@ public class Producer {
     public static void main(String[] args) throws Exception {
 
         DefaultMQProducer producer = new DefaultMQProducer("example_group_name");
-        producer.setNamesrvAddr("47.101.167.134:9876");
+//        producer.setNamesrvAddr("47.101.167.134:9876"); //192.168.175.129
+        producer.setNamesrvAddr("192.168.175.130:9876"); //192.168.175.129
         producer.setVipChannelEnabled(false);
         producer.start();
-        producer.setRetryTimesWhenSendAsyncFailed(0); //失败重试时间
-        for (int i = 0; i < 100; i++) {
+//        producer.setRetryTimesWhenSendAsyncFailed(0); //失败重试时间
+        Random random = new Random();
+        for (int i = 0; i < 10000; i++) {
             final int index = i;
-            Message msgA = new Message("TopicTestA", "TagA", ("A Hello world " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
+            Message msgA = new Message("TopicTestA", "TagA", (random.nextLong() + " Hello world " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
 //            Message msgB = new Message("TopicTestB", "TagB", ("B Hello world " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
 //            Message msgC = new Message("TopicTestC", "TagC", ("C Hello world " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
             SendResult sendResult = producer.send(msgA, 1000 * 60 * 60);

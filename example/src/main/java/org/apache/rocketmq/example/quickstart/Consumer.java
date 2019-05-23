@@ -21,6 +21,8 @@ import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * This example shows how to subscribe and consume messages using providing {@link DefaultMQPushConsumer}.
  */
@@ -30,18 +32,19 @@ public class Consumer {
         consumerSubscribe();
     }
 
-    public static void consumerSubscribe() throws Exception{
+    public static void consumerSubscribe() throws Exception {
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("example_group_name");
-        consumer.setNamesrvAddr("192.168.175.130:9876");
-
+        consumer.setNamesrvAddr("192.168.175.129:9876");
+        consumer.setVipChannelEnabled(false);
         consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_LAST_OFFSET);
         consumer.subscribe("TopicTestA", "*");
-        consumer.subscribe("TopicTestB", "*");
-        consumer.subscribe("TopicTestC", "*");
-
+//        consumer.subscribe("TopicTestB", "*");
+//        consumer.subscribe("TopicTestC", "*");
+        AtomicInteger index = new AtomicInteger();
         consumer.registerMessageListener((MessageListenerConcurrently) (msgs, text) -> {
             msgs.forEach(message -> {
-                System.out.println(new String(message.getBody()));
+                index.decrementAndGet();
+                System.out.println(index.get() + "---" + new String(message.getBody()));
             });
             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
         });
