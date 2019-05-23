@@ -257,6 +257,9 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         }
     }
 
+    /**
+     * 获取所有已经发布Topic
+     */
     @Override
     public Set<String> getPublishTopicList() {
         Set<String> topicList = new HashSet<String>();
@@ -267,6 +270,9 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         return topicList;
     }
 
+    /**
+     * 根据topic获取 TopicPublishInfo 并消息队列不为空
+     */
     @Override
     public boolean isPublishTopicNeedUpdate(String topic) {
         TopicPublishInfo prev = this.topicPublishInfoTable.get(topic);
@@ -300,8 +306,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     }
 
     @Override
-    public void checkTransactionState(final String addr, final MessageExt msg,
-                                      final CheckTransactionStateRequestHeader header) {
+    public void checkTransactionState(final String addr, final MessageExt msg, final CheckTransactionStateRequestHeader header) {
         Runnable request = new Runnable() {
             private final String brokerAddr = addr;
             private final MessageExt message = msg;
@@ -387,6 +392,9 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         this.checkExecutor.submit(request);
     }
 
+    /**
+     * 保存 TopicPublishInfo 到缓存池
+     */
     @Override
     public void updateTopicPublishInfo(final String topic, final TopicPublishInfo info) {
         if (info != null && topic != null) {
@@ -491,13 +499,12 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                     long costTime = System.currentTimeMillis() - beginStartTime;
                     if (timeout > costTime) {
                         try {
-                            sendDefaultImpl(msg, CommunicationMode.ASYNC, sendCallback, timeout - costTime);
+                            sendDefaultImpl(msg, CommunicationMode.ASYNC, sendCallback, timeout - costTime);    //异步发送
                         } catch (Exception e) {
                             sendCallback.onException(e);
                         }
                     } else {
-                        sendCallback.onException(
-                                new RemotingTooMuchRequestException("DEFAULT ASYNC send call timeout"));
+                        sendCallback.onException(new RemotingTooMuchRequestException("DEFAULT ASYNC send call timeout"));
                     }
                 }
 
@@ -526,7 +533,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     private SendResult sendDefaultImpl(Message msg, final CommunicationMode communicationMode, final SendCallback sendCallback, final long timeout)
             throws MQClientException, RemotingException, MQBrokerException, InterruptedException {
         this.makeSureStateOK();     //mq是否正在运行, 否则抛出异常
-        Validators.checkMessage(msg, this.defaultMQProducer);
+        Validators.checkMessage(msg, this.defaultMQProducer);   // 验证message数据
 
         final long invokeID = random.nextLong();
         long beginTimestampFirst = System.currentTimeMillis();
@@ -546,7 +553,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             for (; times < timesTotal; times++) {
                 String lastBrokerName = null == mq ? null : mq.getBrokerName();
                 // 选择一个消息队列
-                MessageQueue mqSelected = this.selectOneMessageQueue(topicPublishInfo, lastBrokerName);
+                MessageQueue mqSelected = this.selectOneMessageQueue(topicPublishInfo, lastBrokerName); //
                 if (mqSelected != null) {
                     mq = mqSelected;
                     brokersSent[times] = mq.getBrokerName();
@@ -697,7 +704,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                                       final long timeout) throws MQClientException, RemotingException, MQBrokerException, InterruptedException {
         long beginStartTime = System.currentTimeMillis();
         // 127.0.0.1:10911
-        String brokerAddr = this.mQClientFactory.findBrokerAddressInPublish(mq.getBrokerName());
+        String brokerAddr = this.mQClientFactory.findBrokerAddressInPublish(mq.getBrokerName());    //获取主broker的ip
         if (null == brokerAddr) {
             tryToFindTopicPublishInfo(mq.getTopic());
             brokerAddr = this.mQClientFactory.findBrokerAddressInPublish(mq.getBrokerName());
@@ -705,8 +712,8 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
         SendMessageContext context = null;
         if (brokerAddr != null) {
-            // 如果设置 vipChannelEnabled 为 false 则直接使用broker上的地址
-            brokerAddr = MixAll.brokerVIPChannel(this.defaultMQProducer.isSendMessageWithVIPChannel(), brokerAddr);
+            //设置 vipChannelEnabled 为 false 使用10911端口, 否则10909端口
+            brokerAddr = MixAll.brokerVIPChannel(this.defaultMQProducer.isSendMessageWithVIPChannel(), brokerAddr); //端口-2
 
             byte[] prevBody = msg.getBody();
             try {

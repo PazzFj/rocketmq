@@ -107,8 +107,8 @@ public class MQClientInstance {
     private final ConcurrentMap<String, TopicRouteData> topicRouteTable = new ConcurrentHashMap<String, TopicRouteData>();
     private final Lock lockNamesrv = new ReentrantLock();
     private final Lock lockHeartbeat = new ReentrantLock();
-    //brokerName 主从节点地址表
-    private final ConcurrentMap<String/* Broker Name */, HashMap<Long/* brokerId */, String/* address */>> brokerAddrTable = new ConcurrentHashMap<String, HashMap<Long, String>>();
+    //brokerName 主从节点地址表/* brokerName => brokerID \ address */
+    private final ConcurrentMap<String, HashMap<Long, String>> brokerAddrTable = new ConcurrentHashMap<String, HashMap<Long, String>>();
     //broker版本表
     private final ConcurrentMap<String/* Broker Name */, HashMap<String/* address */, Integer>> brokerVersionTable = new ConcurrentHashMap<String, HashMap<String, Integer>>();
     // 单个线程池(MQClientFactoryScheduledThread)
@@ -670,7 +670,7 @@ public class MQClientInstance {
                     }
                     if (topicRouteData != null) {
                         TopicRouteData old = this.topicRouteTable.get(topic);
-                        boolean changed = topicRouteDataIsChange(old, topicRouteData);
+                        boolean changed = topicRouteDataIsChange(old, topicRouteData);  //为空就return true
                         if (!changed) {
                             changed = this.isNeedUpdateTopicRouteInfo(topic);
                         } else {

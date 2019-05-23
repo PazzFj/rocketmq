@@ -28,8 +28,8 @@ public class Producer {
     public static void main(String[] args) throws Exception {
 
         DefaultMQProducer producer = new DefaultMQProducer("example_group_name");
-        producer.setNamesrvAddr("192.168.175.130:9876");
-        producer.setVipChannelEnabled(true);
+        producer.setNamesrvAddr("47.101.167.134:9876");
+        producer.setVipChannelEnabled(false);
         producer.start();
         producer.setRetryTimesWhenSendAsyncFailed(0); //失败重试时间
         for (int i = 0; i < 100; i++) {

@@ -28,12 +28,12 @@ import org.apache.rocketmq.common.protocol.header.CheckTransactionStateRequestHe
 public interface MQProducerInner {
 
     /**
-     * 获取所有发布Topic
+     * 获取所有已经发布Topic
      */
     Set<String> getPublishTopicList();
 
     /**
-     * 该topic 是否需要修改
+     * 根据topic获取 TopicPublishInfo 并消息队列不为空
      */
     boolean isPublishTopicNeedUpdate(final String topic);
 
@@ -53,7 +53,7 @@ public interface MQProducerInner {
     void checkTransactionState(final String addr, final MessageExt msg, final CheckTransactionStateRequestHeader checkRequestHeader);
 
     /**
-     * 修改topic 发布信息
+     * 保存 TopicPublishInfo 到缓存池
      */
     void updateTopicPublishInfo(final String topic, final TopicPublishInfo info);
 
