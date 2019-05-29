@@ -20,14 +20,14 @@ import com.alibaba.fastjson.JSON;
 import org.apache.rocketmq.common.message.MessageQueue;
 
 public class SendResult {
-    private SendStatus sendStatus;
-    private String msgId;
-    private MessageQueue messageQueue;
-    private long queueOffset;
-    private String transactionId;
-    private String offsetMsgId;
-    private String regionId;
-    private boolean traceOn = true;
+    private SendStatus sendStatus;      //发送状态
+    private String msgId;               //发送内容
+    private MessageQueue messageQueue;  //消息队列
+    private long queueOffset;           //队列偏移量
+    private String transactionId;       //事务id
+    private String offsetMsgId;         //偏移消息id
+    private String regionId;            //范围id
+    private boolean traceOn = true;     //追踪(记录)
 
     public SendResult() {
     }

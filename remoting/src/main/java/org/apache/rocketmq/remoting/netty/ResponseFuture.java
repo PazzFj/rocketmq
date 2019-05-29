@@ -38,7 +38,7 @@ public class ResponseFuture {
     private final SemaphoreReleaseOnlyOnce once;        //信号发射只一次*
 
     private final AtomicBoolean executeCallbackOnlyOnce = new AtomicBoolean(false);
-    private volatile RemotingCommand responseCommand;   //  请求数据对象%
+    private volatile RemotingCommand responseCommand;   // 请求数据对象%
     private volatile boolean sendRequestOK = true;      // 发送请求成功还是失败%
     private volatile Throwable cause;                   // 异常   %
 

@@ -359,20 +359,9 @@ public class MQClientAPIImpl {
     /**
      * 发送异步消息
      */
-    private void sendMessageAsync(
-            final String addr,
-            final String brokerName,
-            final Message msg,
-            final long timeoutMillis,
-            final RemotingCommand request,
-            final SendCallback sendCallback,
-            final TopicPublishInfo topicPublishInfo,
-            final MQClientInstance instance,
-            final int retryTimesWhenSendFailed,
-            final AtomicInteger times,
-            final SendMessageContext context,
-            final DefaultMQProducerImpl producer
-    ) throws InterruptedException, RemotingException {
+    private void sendMessageAsync(final String addr, final String brokerName, final Message msg, final long timeoutMillis, final RemotingCommand request,
+                                  final SendCallback sendCallback, final TopicPublishInfo topicPublishInfo, final MQClientInstance instance, final int retryTimesWhenSendFailed,
+                                  final AtomicInteger times, final SendMessageContext context, final DefaultMQProducerImpl producer) throws InterruptedException, RemotingException {
         this.remotingClient.invokeAsync(addr, request, timeoutMillis, new InvokeCallback() {
             @Override
             public void operationComplete(ResponseFuture responseFuture) {

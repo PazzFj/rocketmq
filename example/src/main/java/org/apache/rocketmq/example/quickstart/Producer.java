@@ -31,7 +31,7 @@ public class Producer {
 
         DefaultMQProducer producer = new DefaultMQProducer("example_group_name");
 //        producer.setNamesrvAddr("47.101.167.134:9876"); //192.168.175.129
-        producer.setNamesrvAddr("192.168.175.130:9876"); //192.168.175.129
+        producer.setNamesrvAddr("47.101.167.134:9876"); //192.168.175.129
         producer.setVipChannelEnabled(false);
         producer.start();
 //        producer.setRetryTimesWhenSendAsyncFailed(0); //失败重试时间
@@ -42,7 +42,7 @@ public class Producer {
 //            Message msgB = new Message("TopicTestB", "TagB", ("B Hello world " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
 //            Message msgC = new Message("TopicTestC", "TagC", ("C Hello world " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
             SendResult sendResult = producer.send(msgA, 1000 * 60 * 60);
-            System.out.println("sync: " + sendResult.getMsgId());
+            System.out.println("sync: " + sendResult.getMessageQueue().getQueueId());
 //            producer.send(msgB, new SendCallback() {
 //                @Override
 //                public void onSuccess(SendResult sendResult) {
